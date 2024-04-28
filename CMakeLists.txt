@@ -12,6 +12,25 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sonia_common_cpp REQUIRED)
+find_package(sonia_common_ros2 REQUIRED)
+
+include_directories(include)
+
+file(GLOB SOURCES src/*.cpp)
+
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(TARGETS
+${PROJECT_NAME}
+  DESTINATION lib/${PROJECT_NAME})
+
+ament_target_dependencies(${PROJECT_NAME} rclcpp sonia_common_cpp sonia_common_ros2)
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
