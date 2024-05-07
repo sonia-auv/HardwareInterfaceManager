@@ -11,6 +11,7 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(sonia_common_cpp REQUIRED)
 find_package(sonia_common_ros2 REQUIRED)
 
@@ -29,7 +30,7 @@ install(TARGETS
 ${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME})
 
-ament_target_dependencies(${PROJECT_NAME} rclcpp sonia_common_cpp sonia_common_ros2)
+ament_target_dependencies(${PROJECT_NAME} rclcpp sonia_common_cpp std_msgs sonia_common_ros2)
 
 
 if(BUILD_TESTING)
