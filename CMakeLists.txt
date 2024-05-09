@@ -27,13 +27,11 @@ install(
   DESTINATION include
 )
 
-
-
-ament_target_dependencies(${PROJECT_NAME} rclcpp sonia_common_cpp sonia_common_ros2 std_msgs std_srvs)
-
 install(TARGETS
 ${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME})
+
+ament_target_dependencies(${PROJECT_NAME} rclcpp sonia_common_cpp sonia_common_ros2 std_msgs std_srvs)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
