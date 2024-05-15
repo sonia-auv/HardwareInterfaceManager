@@ -1,5 +1,3 @@
-#include <chrono>
-
 #include "hardware_interface_manager/RS485Interface.h"
 
 using std::placeholders::_1;
@@ -24,10 +22,10 @@ namespace sonia_hw_interface
 
         
         _pwmPublisher = this->create_publisher<std_msgs::msg::UInt16MultiArray>("/thruster_provider/thruster_pwm",10);
-        _dryTestServer = this->create_service<sonia_common_ros2::srv::DryTest>("dry_test", std::bind(&RS485Interface::DryTestServiceCallback, this,_1,_2));
+        // _dryTestServer = this->create_service<sonia_common_ros2::srv::DryTest>("dry_test", std::bind(&RS485Interface::DryTestServiceCallback, this,_1,_2));
         _pwmSubscriber = this->create_subscription<std_msgs::msg::UInt16MultiArray>("/thruster_provider/thruster_pwm",10,std::bind(&RS485Interface::PwmCallback, this,_1));
         _motorOnOff=this->create_subscription<std_msgs::msg::Bool>("/thruster_provider/startMotor",10,std::bind(&RS485Interface::EnableDisableMotors, this,_1));
-
+        auv = std::getenv("AUV");
         if (!strcmp(auv, "AUV8")|| !strcmp(auv, "LOCAL")){
             ESC_SLAVE = sonia_common_ros2::msg::MotorMessages::SLAVE_PWR_MANAGEMENT;
         }
@@ -216,6 +214,7 @@ namespace sonia_hw_interface
                 data[data_size - 3] = std::get<0>(checksum);
                 data[data_size - 2] = std::get<1>(checksum);
                 data[data_size - 1] = _END_BYTE;
+                _rs485Connection.Transmit(data, data_size);
                 delete data;
             }
         }
@@ -316,21 +315,30 @@ namespace sonia_hw_interface
     
     void RS485Interface::EnableDisableMotors(const std_msgs::msg::Bool &msg)
     {
-        if(msg.data){
-             
-            ser.slave = ESC_SLAVE;
-            ser.cmd = _Cmd::CMD_ACT_MOTOR;
-            ser.data.clear();
+        queueObject ser;
+        ser.slave = _SlaveId::SLAVE_PWR_MANAGEMENT;
+        ser.cmd = _Cmd::CMD_ACT_MOTOR;
+        if(msg.data){            
             for (size_t i = 0; i < 8; i++)
             {
                 ser.data.push_back(1);
             }
-            _writerQueue.push_back(ser);
         }
+        else
+        {
+            for (size_t i = 0; i < 8; i++)
+            {
+                ser.data.push_back(0);
+            }
+        }
+        _writerQueue.push_back(ser);
+        
 
     }
     void RS485Interface::PwmCallback(const std_msgs::msg::UInt16MultiArray &msg)
     {
+        queueObject ser;
+
         ser.slave=ESC_SLAVE;
         ser.cmd= _Cmd::CMD_PWM;
         ser.data.clear();
@@ -342,24 +350,24 @@ namespace sonia_hw_interface
         }  
     }
 
-    bool RS485Interface::DryTestServiceCallback(const std::shared_ptr<sonia_common_ros2::srv::DryTest::Request> request, std::shared_ptr<sonia_common_ros2::srv::DryTest::Response> response)
-    {
-        std::vector<uint16_t> vect(nb_thruster, default_pwm);
-        std_msgs::msg::UInt16MultiArray pwmsMsg;
-        pwmsMsg.data.clear();
-        pwmsMsg.data.insert(pwmsMsg.data.end(), vect.begin(), vect.end());
+    // bool RS485Interface::DryTestServiceCallback(const std::shared_ptr<sonia_common_ros2::srv::DryTest::Request> request, std::shared_ptr<sonia_common_ros2::srv::DryTest::Response> response)
+    // {
+    //     std::vector<uint16_t> vect(nb_thruster, default_pwm);
+    //     std_msgs::msg::UInt16MultiArray pwmsMsg;
+    //     pwmsMsg.data.clear();
+    //     pwmsMsg.data.insert(pwmsMsg.data.end(), vect.begin(), vect.end());
 
-        for(uint8_t i=0; i < nb_thruster; ++i)
-        {
-            pwmsMsg.data[i] = dryTestPwm;
-            _pwmPublisher->publish(pwmsMsg);
-            PwmCallback(pwmsMsg);
-            std::this_thread::sleep_for(std::chrono::milliseconds(dryTestOnTime));
-            pwmsMsg.data[i] = default_pwm;
-            _pwmPublisher->publish(pwmsMsg);
-            PwmCallback(pwmsMsg);
-            std::this_thread::sleep_for(std::chrono::milliseconds(dryTestDelay));
-        }
-        return true;
-    }
+    //     for(uint8_t i=0; i < nb_thruster; ++i)
+    //     {
+    //         pwmsMsg.data[i] = dryTestPwm;
+    //         _pwmPublisher->publish(pwmsMsg);
+    //         PwmCallback(pwmsMsg);
+    //         std::this_thread::sleep_for(std::chrono::milliseconds(dryTestOnTime));
+    //         pwmsMsg.data[i] = default_pwm;
+    //         _pwmPublisher->publish(pwmsMsg);
+    //         PwmCallback(pwmsMsg);
+    //         std::this_thread::sleep_for(std::chrono::milliseconds(dryTestDelay));
+    //     }
+    //     return true;
+    // }
 }

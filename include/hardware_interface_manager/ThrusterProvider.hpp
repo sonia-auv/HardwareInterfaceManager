@@ -3,7 +3,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "hardware_interface_manager/RS485Interface.h"
 #include "sonia_common_ros2/msg/motor_messages.hpp"
-#include "sonia_common_ros2/srv/dry_test.hpp"
+// #include "sonia_common_ros2/srv/dry_test.hpp"
 #include <std_srvs/srv/empty.hpp>
 #include <std_msgs/msg/u_int16_multi_array.hpp>
 #include <std_msgs/msg/bool.hpp>
@@ -17,7 +17,7 @@ namespace thruster_provider {
             ~ThrusterProvider();
 
         private:
-            bool DryTestServiceCallback(const std::shared_ptr<sonia_common_ros2::srv::DryTest::Request> request, std::shared_ptr<sonia_common_ros2::srv::DryTest::Response> response);
+            // bool DryTestServiceCallback(const std::shared_ptr<sonia_common_ros2::srv::DryTest::Request> request, std::shared_ptr<sonia_common_ros2::srv::DryTest::Response> response);
             void EnableDisableMotors(const std_msgs::msg::Bool &msg);
             void PwmCallback(const std_msgs::msg::UInt16MultiArray &msg);
             
@@ -26,7 +26,7 @@ namespace thruster_provider {
 
             rclcpp::Publisher<std_msgs::msg::UInt16MultiArray>::SharedPtr _pwmPublisher;
             rclcpp::Publisher<sonia_common_ros2::msg::MotorMessages>::SharedPtr _rs485Publisher;
-            rclcpp::Service<sonia_common_ros2::srv::DryTest>::SharedPtr _dryTestServer;
+            // rclcpp::Service<sonia_common_ros2::srv::DryTest>::SharedPtr _dryTestServer;
             rclcpp::Subscription<std_msgs::msg::UInt16MultiArray>::SharedPtr _pwmSubscriber;
             rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr _motorOnOff;
 

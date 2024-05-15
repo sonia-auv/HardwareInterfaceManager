@@ -11,7 +11,7 @@ namespace thruster_provider{
     {
         _rs485Publisher =this->create_publisher<sonia_common_ros2::msg::MotorMessages>("/thruster_provider/rs485",10);
         _pwmPublisher = this->create_publisher<std_msgs::msg::UInt16MultiArray>("/thruster_provider/thruster_pwm",10);
-        _dryTestServer = this->create_service<sonia_common_ros2::srv::DryTest>("dry_test", std::bind(&ThrusterProvider::DryTestServiceCallback, this,_1,_2));
+        // _dryTestServer = this->create_service<sonia_common_ros2::srv::DryTest>("dry_test", std::bind(&ThrusterProvider::DryTestServiceCallback, this,_1,_2));
         _pwmSubscriber = this->create_subscription<std_msgs::msg::UInt16MultiArray>("/thruster_provider/thruster_pwm",10,std::bind(&ThrusterProvider::PwmCallback, this,_1));
         _motorOnOff=this->create_subscription<std_msgs::msg::Bool>("/thruster_provider/startMotor",10,std::bind(&ThrusterProvider::EnableDisableMotors, this,_1));
 
@@ -42,24 +42,24 @@ namespace thruster_provider{
         _rs485Publisher->publish(rs485Message);
     }
 
-    bool ThrusterProvider::DryTestServiceCallback(const std::shared_ptr<sonia_common_ros2::srv::DryTest::Request> request, std::shared_ptr<sonia_common_ros2::srv::DryTest::Response> response)
-    {
-        std::vector<uint16_t> vect(nb_thruster, default_pwm);
-        std_msgs::msg::UInt16MultiArray pwmsMsg;
-        pwmsMsg.data.clear();
-        pwmsMsg.data.insert(pwmsMsg.data.end(), vect.begin(), vect.end());
+    // bool ThrusterProvider::DryTestServiceCallback(const std::shared_ptr<sonia_common_ros2::srv::DryTest::Request> request, std::shared_ptr<sonia_common_ros2::srv::DryTest::Response> response)
+    // {
+    //     std::vector<uint16_t> vect(nb_thruster, default_pwm);
+    //     std_msgs::msg::UInt16MultiArray pwmsMsg;
+    //     pwmsMsg.data.clear();
+    //     pwmsMsg.data.insert(pwmsMsg.data.end(), vect.begin(), vect.end());
 
-        for(uint8_t i=0; i < nb_thruster; ++i)
-        {
-            pwmsMsg.data[i] = dryTestPwm;
-            _pwmPublisher->publish(pwmsMsg);
-            PwmCallback(pwmsMsg);
-            std::this_thread::sleep_for(std::chrono::milliseconds(dryTestOnTime));
-            pwmsMsg.data[i] = default_pwm;
-            _pwmPublisher->publish(pwmsMsg);
-            PwmCallback(pwmsMsg);
-            std::this_thread::sleep_for(std::chrono::milliseconds(dryTestDelay));
-        }
-        return true;
-    }
+    //     for(uint8_t i=0; i < nb_thruster; ++i)
+    //     {
+    //         pwmsMsg.data[i] = dryTestPwm;
+    //         _pwmPublisher->publish(pwmsMsg);
+    //         PwmCallback(pwmsMsg);
+    //         std::this_thread::sleep_for(std::chrono::milliseconds(dryTestOnTime));
+    //         pwmsMsg.data[i] = default_pwm;
+    //         _pwmPublisher->publish(pwmsMsg);
+    //         PwmCallback(pwmsMsg);
+    //         std::this_thread::sleep_for(std::chrono::milliseconds(dryTestDelay));
+    //     }
+    //     return true;
+    // }
 }
