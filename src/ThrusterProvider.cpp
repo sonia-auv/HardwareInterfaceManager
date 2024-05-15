@@ -13,19 +13,24 @@ namespace thruster_provider{
         _pwmPublisher = this->create_publisher<std_msgs::msg::UInt16MultiArray>("/thruster_provider/thruster_pwm",10);
         _dryTestServer = this->create_service<sonia_common_ros2::srv::DryTest>("dry_test", std::bind(&ThrusterProvider::DryTestServiceCallback, this,_1,_2));
         _pwmSubscriber = this->create_subscription<std_msgs::msg::UInt16MultiArray>("/thruster_provider/thruster_pwm",10,std::bind(&ThrusterProvider::PwmCallback, this,_1));
+        _motorOnOff=this->create_subscription<std_msgs::msg::Bool>("/thruster_provider/startMotor",10,std::bind(&ThrusterProvider::EnableDisableMotors, this,_1));
 
         if (!strcmp(auv, "AUV8")|| !strcmp(auv, "LOCAL")){
-            SLAVE = sonia_common_ros2::msg::MotorMessages::SLAVE_PWR_MANAGEMENT;
+            ESC_SLAVE = sonia_common_ros2::msg::MotorMessages::SLAVE_PWR_MANAGEMENT;
         }
         else {
-            SLAVE = sonia_common_ros2::msg::MotorMessages::SLAVE_ESC;
+            ESC_SLAVE = sonia_common_ros2::msg::MotorMessages::SLAVE_ESC;
         }
     }
     ThrusterProvider::~ThrusterProvider(){}
 
+    void ThrusterProvider::EnableDisableMotors(const std_msgs::msg::Bool &msg)
+    {
+        
+    }
     void ThrusterProvider::PwmCallback(const std_msgs::msg::UInt16MultiArray &msg)
     {
-        rs485Message.slave=SLAVE;
+        rs485Message.slave=ESC_SLAVE;
         rs485Message.cmd= sonia_common_ros2::msg::MotorMessages::CMD_PWM;
         rs485Message.data.clear();
                 
