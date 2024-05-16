@@ -190,28 +190,19 @@ namespace sonia_hw_interface
         SharedQueue<queueObject> _writerQueue;
         SharedQueue<uint8_t> _parseQueue;
         
-
         bool _thread_control;
 
-        // bool DryTestServiceCallback(const std::shared_ptr<sonia_common_ros2::srv::DryTest::Request> request, std::shared_ptr<sonia_common_ros2::srv::DryTest::Response> response);
         void EnableDisableMotors(const std_msgs::msg::Bool &msg);
         void PwmCallback(const std_msgs::msg::UInt16MultiArray &msg);
         
         uint8_t ESC_SLAVE = 0;
 
         rclcpp::Publisher<std_msgs::msg::UInt16MultiArray>::SharedPtr _pwmPublisher;
-        rclcpp::Publisher<sonia_common_ros2::msg::MotorMessages>::SharedPtr _rs485Publisher;
-        // rclcpp::Service<sonia_common_ros2::srv::DryTest>::SharedPtr _dryTestServer;
         rclcpp::Subscription<std_msgs::msg::UInt16MultiArray>::SharedPtr _pwmSubscriber;
         rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr _motorOnOff;
 
         const char* auv;
-        const uint32_t dryTestDelay = 1000;
-        const uint32_t dryTestOnTime = 3000;
         const uint8_t nb_thruster = 8;
-        const uint16_t default_pwm = 1500;
-        const uint16_t dryTestPwm = 1550;
-
     };
 
 }

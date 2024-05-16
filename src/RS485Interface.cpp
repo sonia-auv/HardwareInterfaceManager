@@ -22,7 +22,6 @@ namespace sonia_hw_interface
 
         
         _pwmPublisher = this->create_publisher<std_msgs::msg::UInt16MultiArray>("/thruster_provider/thruster_pwm",10);
-        // _dryTestServer = this->create_service<sonia_common_ros2::srv::DryTest>("dry_test", std::bind(&RS485Interface::DryTestServiceCallback, this,_1,_2));
         _pwmSubscriber = this->create_subscription<std_msgs::msg::UInt16MultiArray>("/thruster_provider/thruster_pwm",10,std::bind(&RS485Interface::PwmCallback, this,_1));
         _motorOnOff=this->create_subscription<std_msgs::msg::Bool>("/thruster_provider/startMotor",10,std::bind(&RS485Interface::EnableDisableMotors, this,_1));
         auv = std::getenv("AUV");
@@ -343,31 +342,12 @@ namespace sonia_hw_interface
         ser.cmd= _Cmd::CMD_PWM;
         ser.data.clear();
                 
-        for(uint8_t i=0; i<nb_thruster; ++i)
+        for(size_t i=0; i<nb_thruster; i++)
         {
             ser.data.push_back(msg.data[i]>>8);
             ser.data.push_back(msg.data[i] & 0xFF);
-        }  
+        } 
+        _writerQueue.push_back(ser); 
     }
 
-    // bool RS485Interface::DryTestServiceCallback(const std::shared_ptr<sonia_common_ros2::srv::DryTest::Request> request, std::shared_ptr<sonia_common_ros2::srv::DryTest::Response> response)
-    // {
-    //     std::vector<uint16_t> vect(nb_thruster, default_pwm);
-    //     std_msgs::msg::UInt16MultiArray pwmsMsg;
-    //     pwmsMsg.data.clear();
-    //     pwmsMsg.data.insert(pwmsMsg.data.end(), vect.begin(), vect.end());
-
-    //     for(uint8_t i=0; i < nb_thruster; ++i)
-    //     {
-    //         pwmsMsg.data[i] = dryTestPwm;
-    //         _pwmPublisher->publish(pwmsMsg);
-    //         PwmCallback(pwmsMsg);
-    //         std::this_thread::sleep_for(std::chrono::milliseconds(dryTestOnTime));
-    //         pwmsMsg.data[i] = default_pwm;
-    //         _pwmPublisher->publish(pwmsMsg);
-    //         PwmCallback(pwmsMsg);
-    //         std::this_thread::sleep_for(std::chrono::milliseconds(dryTestDelay));
-    //     }
-    //     return true;
-    // }
 }
