@@ -21,15 +21,15 @@ namespace sonia_hw_interface
         _timerKillMission = this->create_wall_timer(500ms, std::bind(&RS485Interface::pollKillMission, this));
 
         
-        _pwmPublisher = this->create_publisher<std_msgs::msg::UInt16MultiArray>("/thruster_provider/thruster_pwm",10);
-        _pwmSubscriber = this->create_subscription<std_msgs::msg::UInt16MultiArray>("/thruster_provider/thruster_pwm",10,std::bind(&RS485Interface::PwmCallback, this,_1));
+        _pwmPublisher = this->create_publisher<sonia_common_ros2::msg::MotorMessages>("/thruster_provider/thruster_pwm",10);
+        _pwmSubscriber = this->create_subscription<sonia_common_ros2::msg::MotorMessages>("/thruster_provider/thruster_pwm",10,std::bind(&RS485Interface::PwmCallback, this,_1));
         _motorOnOff=this->create_subscription<std_msgs::msg::Bool>("/thruster_provider/startMotor",10,std::bind(&RS485Interface::EnableDisableMotors, this,_1));
         auv = std::getenv("AUV");
         if (!strcmp(auv, "AUV8")|| !strcmp(auv, "LOCAL")){
-            ESC_SLAVE = sonia_common_ros2::msg::MotorMessages::SLAVE_PWR_MANAGEMENT;
+            ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
         }
         else {
-            ESC_SLAVE = sonia_common_ros2::msg::MotorMessages::SLAVE_ESC;
+            ESC_SLAVE = _SlaveId::SLAVE_ESC;
         }
     }
 
@@ -334,7 +334,7 @@ namespace sonia_hw_interface
         
 
     }
-    void RS485Interface::PwmCallback(const std_msgs::msg::UInt16MultiArray &msg)
+    void RS485Interface::PwmCallback(const sonia_common_ros2::msg::MotorMessages &msg)
     {
         queueObject ser;
 
