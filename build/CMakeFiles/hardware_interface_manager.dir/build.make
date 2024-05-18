@@ -69,24 +69,10 @@ include CMakeFiles/hardware_interface_manager.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/hardware_interface_manager.dir/flags.make
 
-CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o: CMakeFiles/hardware_interface_manager.dir/flags.make
-CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o: ../src/PowerProvider.cpp
-CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o: CMakeFiles/hardware_interface_manager.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sawali/ros_sonia_ws2/src/hardware_interface_manager/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o -MF CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o.d -o CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o -c /home/sawali/ros_sonia_ws2/src/hardware_interface_manager/src/PowerProvider.cpp
-
-CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/sawali/ros_sonia_ws2/src/hardware_interface_manager/src/PowerProvider.cpp > CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.i
-
-CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/sawali/ros_sonia_ws2/src/hardware_interface_manager/src/PowerProvider.cpp -o CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.s
-
 CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o: CMakeFiles/hardware_interface_manager.dir/flags.make
 CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o: ../src/RS485Interface.cpp
 CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o: CMakeFiles/hardware_interface_manager.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sawali/ros_sonia_ws2/src/hardware_interface_manager/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sawali/ros_sonia_ws2/src/hardware_interface_manager/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o -MF CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o.d -o CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o -c /home/sawali/ros_sonia_ws2/src/hardware_interface_manager/src/RS485Interface.cpp
 
 CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.i: cmake_force
@@ -97,24 +83,10 @@ CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/sawali/ros_sonia_ws2/src/hardware_interface_manager/src/RS485Interface.cpp -o CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.s
 
-CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o: CMakeFiles/hardware_interface_manager.dir/flags.make
-CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o: ../src/ThrusterProvider.cpp
-CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o: CMakeFiles/hardware_interface_manager.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sawali/ros_sonia_ws2/src/hardware_interface_manager/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o -MF CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o.d -o CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o -c /home/sawali/ros_sonia_ws2/src/hardware_interface_manager/src/ThrusterProvider.cpp
-
-CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/sawali/ros_sonia_ws2/src/hardware_interface_manager/src/ThrusterProvider.cpp > CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.i
-
-CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/sawali/ros_sonia_ws2/src/hardware_interface_manager/src/ThrusterProvider.cpp -o CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.s
-
 CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o: CMakeFiles/hardware_interface_manager.dir/flags.make
 CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o: ../src/main.cpp
 CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o: CMakeFiles/hardware_interface_manager.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sawali/ros_sonia_ws2/src/hardware_interface_manager/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sawali/ros_sonia_ws2/src/hardware_interface_manager/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o -MF CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o.d -o CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o -c /home/sawali/ros_sonia_ws2/src/hardware_interface_manager/src/main.cpp
 
 CMakeFiles/hardware_interface_manager.dir/src/main.cpp.i: cmake_force
@@ -127,17 +99,13 @@ CMakeFiles/hardware_interface_manager.dir/src/main.cpp.s: cmake_force
 
 # Object files for target hardware_interface_manager
 hardware_interface_manager_OBJECTS = \
-"CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o" \
 "CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o" \
-"CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o" \
 "CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o"
 
 # External object files for target hardware_interface_manager
 hardware_interface_manager_EXTERNAL_OBJECTS =
 
-hardware_interface_manager: CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o
 hardware_interface_manager: CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o
-hardware_interface_manager: CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o
 hardware_interface_manager: CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o
 hardware_interface_manager: CMakeFiles/hardware_interface_manager.dir/build.make
 hardware_interface_manager: /opt/ros/humble/lib/librclcpp.so
@@ -220,7 +188,7 @@ hardware_interface_manager: /opt/ros/humble/lib/librosidl_runtime_c.so
 hardware_interface_manager: /opt/ros/humble/lib/librcutils.so
 hardware_interface_manager: /usr/lib/x86_64-linux-gnu/libpython3.10.so
 hardware_interface_manager: CMakeFiles/hardware_interface_manager.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/sawali/ros_sonia_ws2/src/hardware_interface_manager/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable hardware_interface_manager"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/sawali/ros_sonia_ws2/src/hardware_interface_manager/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable hardware_interface_manager"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/hardware_interface_manager.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

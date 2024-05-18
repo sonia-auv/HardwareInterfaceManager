@@ -8,9 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/sawali/ros_sonia_ws2/src/hardware_interface_manager/src/PowerProvider.cpp" "CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o" "gcc" "CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o.d"
   "/home/sawali/ros_sonia_ws2/src/hardware_interface_manager/src/RS485Interface.cpp" "CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o" "gcc" "CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o.d"
-  "/home/sawali/ros_sonia_ws2/src/hardware_interface_manager/src/ThrusterProvider.cpp" "CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o" "gcc" "CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o.d"
   "/home/sawali/ros_sonia_ws2/src/hardware_interface_manager/src/main.cpp" "CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o" "gcc" "CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o.d"
   )
 

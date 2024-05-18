@@ -210,30 +210,6 @@ hardware_interface_manager/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hardware_interface_manager.dir/build.make CMakeFiles/hardware_interface_manager.dir/build
 .PHONY : hardware_interface_manager/fast
 
-src/PowerProvider.o: src/PowerProvider.cpp.o
-.PHONY : src/PowerProvider.o
-
-# target to build an object file
-src/PowerProvider.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hardware_interface_manager.dir/build.make CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o
-.PHONY : src/PowerProvider.cpp.o
-
-src/PowerProvider.i: src/PowerProvider.cpp.i
-.PHONY : src/PowerProvider.i
-
-# target to preprocess a source file
-src/PowerProvider.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hardware_interface_manager.dir/build.make CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.i
-.PHONY : src/PowerProvider.cpp.i
-
-src/PowerProvider.s: src/PowerProvider.cpp.s
-.PHONY : src/PowerProvider.s
-
-# target to generate assembly for a file
-src/PowerProvider.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hardware_interface_manager.dir/build.make CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.s
-.PHONY : src/PowerProvider.cpp.s
-
 src/RS485Interface.o: src/RS485Interface.cpp.o
 .PHONY : src/RS485Interface.o
 
@@ -257,30 +233,6 @@ src/RS485Interface.s: src/RS485Interface.cpp.s
 src/RS485Interface.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hardware_interface_manager.dir/build.make CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.s
 .PHONY : src/RS485Interface.cpp.s
-
-src/ThrusterProvider.o: src/ThrusterProvider.cpp.o
-.PHONY : src/ThrusterProvider.o
-
-# target to build an object file
-src/ThrusterProvider.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hardware_interface_manager.dir/build.make CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o
-.PHONY : src/ThrusterProvider.cpp.o
-
-src/ThrusterProvider.i: src/ThrusterProvider.cpp.i
-.PHONY : src/ThrusterProvider.i
-
-# target to preprocess a source file
-src/ThrusterProvider.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hardware_interface_manager.dir/build.make CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.i
-.PHONY : src/ThrusterProvider.cpp.i
-
-src/ThrusterProvider.s: src/ThrusterProvider.cpp.s
-.PHONY : src/ThrusterProvider.s
-
-# target to generate assembly for a file
-src/ThrusterProvider.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hardware_interface_manager.dir/build.make CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.s
-.PHONY : src/ThrusterProvider.cpp.s
 
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
@@ -322,15 +274,9 @@ help:
 	@echo "... hardware_interface_manager_uninstall"
 	@echo "... uninstall"
 	@echo "... hardware_interface_manager"
-	@echo "... src/PowerProvider.o"
-	@echo "... src/PowerProvider.i"
-	@echo "... src/PowerProvider.s"
 	@echo "... src/RS485Interface.o"
 	@echo "... src/RS485Interface.i"
 	@echo "... src/RS485Interface.s"
-	@echo "... src/ThrusterProvider.o"
-	@echo "... src/ThrusterProvider.i"
-	@echo "... src/ThrusterProvider.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

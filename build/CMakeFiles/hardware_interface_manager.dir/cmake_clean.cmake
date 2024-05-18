@@ -1,10 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o"
-  "CMakeFiles/hardware_interface_manager.dir/src/PowerProvider.cpp.o.d"
   "CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o"
   "CMakeFiles/hardware_interface_manager.dir/src/RS485Interface.cpp.o.d"
-  "CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o"
-  "CMakeFiles/hardware_interface_manager.dir/src/ThrusterProvider.cpp.o.d"
   "CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o"
   "CMakeFiles/hardware_interface_manager.dir/src/main.cpp.o.d"
   "hardware_interface_manager"

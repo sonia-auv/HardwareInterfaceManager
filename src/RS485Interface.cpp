@@ -19,11 +19,11 @@ namespace sonia_hw_interface
         _publisherBatteryVoltages = this->create_publisher<sonia_common_ros2::msg::BatteryVoltage>("/provider_power/battery_voltages", 10);
         _dropperServer = this->create_service<sonia_common_ros2::srv::DropperService>("actuate_dropper", std::bind(&RS485Interface::processDropperRequest, this, _1, _2));
         _timerKillMission = this->create_wall_timer(500ms, std::bind(&RS485Interface::pollKillMission, this));
-
         
-        _pwmPublisher = this->create_publisher<sonia_common_ros2::msg::MotorMessages>("/thruster_provider/thruster_pwm",10);
-        _pwmSubscriber = this->create_subscription<sonia_common_ros2::msg::MotorMessages>("/thruster_provider/thruster_pwm",10,std::bind(&RS485Interface::PwmCallback, this,_1));
-        _motorOnOff=this->create_subscription<std_msgs::msg::Bool>("/thruster_provider/startMotor",10,std::bind(&RS485Interface::EnableDisableMotors, this,_1));
+        _publisherThrusterPwm = this->create_publisher<sonia_common_ros2::msg::MotorMessages>("/provider_thruster/thruster_pwm",10);
+        _subscriberThrusterPwm = this->create_subscription<sonia_common_ros2::msg::MotorMessages>("/provider_thruster/thruster_pwm",10,std::bind(&RS485Interface::PwmCallback, this,_1));
+        _subscriberMotorOnOff=this->create_subscription<std_msgs::msg::Bool>("/provider_thruster/startMotor",10,std::bind(&RS485Interface::EnableDisableMotors, this,_1));
+        
         auv = std::getenv("AUV");
         if (!strcmp(auv, "AUV8")|| !strcmp(auv, "LOCAL")){
             ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;

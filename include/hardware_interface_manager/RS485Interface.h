@@ -195,9 +195,9 @@ namespace sonia_hw_interface
         
         uint8_t ESC_SLAVE = 0;
 
-        rclcpp::Publisher<sonia_common_ros2::msg::MotorMessages>::SharedPtr _pwmPublisher;
-        rclcpp::Subscription<sonia_common_ros2::msg::MotorMessages>::SharedPtr _pwmSubscriber;
-        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr _motorOnOff;
+        rclcpp::Publisher<sonia_common_ros2::msg::MotorMessages>::SharedPtr _publisherThrusterPwm;
+        rclcpp::Subscription<sonia_common_ros2::msg::MotorMessages>::SharedPtr _subscriberThrusterPwm;
+        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr _subscriberMotorOnOff;
 
         const char* auv;
         const uint8_t nb_thruster = 8;
