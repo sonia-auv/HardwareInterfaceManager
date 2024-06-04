@@ -20,17 +20,22 @@ namespace sonia_hw_interface
         _dropperServer = this->create_service<sonia_common_ros2::srv::DropperService>("actuate_dropper", std::bind(&RS485Interface::processDropperRequest, this, _1, _2));
         _timerKillMission = this->create_wall_timer(500ms, std::bind(&RS485Interface::pollKillMission, this));
         
-        _publisherThrusterPwm = this->create_publisher<sonia_common_ros2::msg::MotorMessages>("/provider_thruster/thruster_pwm",10);
-        _subscriberThrusterPwm = this->create_subscription<sonia_common_ros2::msg::MotorMessages>("/provider_thruster/thruster_pwm",10,std::bind(&RS485Interface::PwmCallback, this,_1));
-        _subscriberMotorOnOff=this->create_subscription<std_msgs::msg::Bool>("/provider_thruster/startMotor",10,std::bind(&RS485Interface::EnableDisableMotors, this,_1));
+        _publisherThrusterPwm = this->create_publisher<sonia_common_ros2::msg::MotorPwm>("/provider_thruster/thruster_pwm",10);
+        _subscriberThrusterPwm = this->create_subscription<sonia_common_ros2::msg::MotorPwm>("/provider_thruster/thruster_pwm",10,std::bind(&RS485Interface::PwmCallback, this,_1));
+        _subscriberMotorOnOff=this->create_subscription<std_msgs::msg::Bool>("/provider_power/activate_motors",10,std::bind(&RS485Interface::EnableDisableMotors, this,_1));
         
-        auv = std::getenv("AUV");
-        if (!strcmp(auv, "AUV8")|| !strcmp(auv, "LOCAL")){
-            ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
-        }
-        else {
+        try{
+            auv = std::getenv("AUV");
+            if (!strcmp(auv, "AUV8")|| !strcmp(auv, "LOCAL")){
+                ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
+            }
+            else {
+                ESC_SLAVE = _SlaveId::SLAVE_ESC;
+            }
+        }catch(...){
             ESC_SLAVE = _SlaveId::SLAVE_ESC;
         }
+        
     }
 
     // node destructor
@@ -334,19 +339,37 @@ namespace sonia_hw_interface
         
 
     }
-    void RS485Interface::PwmCallback(const sonia_common_ros2::msg::MotorMessages &msg)
+    void RS485Interface::PwmCallback(const sonia_common_ros2::msg::MotorPwm &msg)
     {
         queueObject ser;
 
         ser.slave=ESC_SLAVE;
         ser.cmd= _Cmd::CMD_PWM;
-        ser.data.clear();
-                
-        for(size_t i=0; i<nb_thruster; i++)
-        {
-            ser.data.push_back(msg.data[i]>>8);
-            ser.data.push_back(msg.data[i] & 0xFF);
-        } 
+        
+        ser.data.push_back(msg.motor1>>8);
+        ser.data.push_back(msg.motor1 & 0xFF);
+
+        ser.data.push_back(msg.motor2>>8);
+        ser.data.push_back(msg.motor2 & 0xFF);
+
+        ser.data.push_back(msg.motor3>>8);
+        ser.data.push_back(msg.motor3 & 0xFF);
+
+        ser.data.push_back(msg.motor4>>8);
+        ser.data.push_back(msg.motor4 & 0xFF);
+
+        ser.data.push_back(msg.motor5>>8);
+        ser.data.push_back(msg.motor5 & 0xFF);
+
+        ser.data.push_back(msg.motor6>>8);
+        ser.data.push_back(msg.motor6 & 0xFF);
+
+        ser.data.push_back(msg.motor7>>8);
+        ser.data.push_back(msg.motor7 & 0xFF);
+
+        ser.data.push_back(msg.motor8>>8);
+        ser.data.push_back(msg.motor8 & 0xFF);
+    
         _writerQueue.push_back(ser); 
     }
 

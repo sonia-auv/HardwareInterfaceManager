@@ -13,7 +13,7 @@
 #include "sonia_common_ros2/msg/motor_voltages.hpp"
 #include "sonia_common_ros2/msg/battery_voltage.hpp"
 #include "sonia_common_ros2/srv/dropper_service.hpp"
-#include "sonia_common_ros2/msg/motor_messages.hpp"
+#include "sonia_common_ros2/msg/motor_pwm.hpp"
 #include <std_srvs/srv/empty.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include "SharedQueue.h"
@@ -191,12 +191,12 @@ namespace sonia_hw_interface
         bool _thread_control;
 
         void EnableDisableMotors(const std_msgs::msg::Bool &msg);
-        void PwmCallback(const sonia_common_ros2::msg::MotorMessages &msg);
+        void PwmCallback(const sonia_common_ros2::msg::MotorPwm &msg);
         
         uint8_t ESC_SLAVE = 0;
 
-        rclcpp::Publisher<sonia_common_ros2::msg::MotorMessages>::SharedPtr _publisherThrusterPwm;
-        rclcpp::Subscription<sonia_common_ros2::msg::MotorMessages>::SharedPtr _subscriberThrusterPwm;
+        rclcpp::Publisher<sonia_common_ros2::msg::MotorPwm>::SharedPtr _publisherThrusterPwm;
+        rclcpp::Subscription<sonia_common_ros2::msg::MotorPwm>::SharedPtr _subscriberThrusterPwm;
         rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr _subscriberMotorOnOff;
 
         const char* auv;
