@@ -10,8 +10,8 @@
 #include "sonia_common_ros2/msg/serial_message.hpp"
 #include "sonia_common_ros2/msg/kill_status.hpp"
 #include "sonia_common_ros2/msg/mission_status.hpp"
-#include "sonia_common_ros2/msg/motor_voltages.hpp"
-#include "sonia_common_ros2/msg/battery_voltage.hpp"
+#include "sonia_common_ros2/msg/motor_power_messages.hpp"
+#include "sonia_common_ros2/msg/battery_power_messages.hpp"
 #include "sonia_common_ros2/srv/dropper_service.hpp"
 #include "sonia_common_ros2/msg/motor_pwm.hpp"
 #include <std_srvs/srv/empty.hpp>
@@ -153,9 +153,9 @@ namespace sonia_hw_interface
          */
         void publishMission(bool status);
 
-        void publishMotorVoltages(std::vector<float> data);
+        void publishMotor(uint8_t cmd, std::vector<float> data);
 
-        void publishBatteryVoltages(float *data);
+        void publishBattery(uint8_t cmd, float *data);
 
         int convertBytesToFloat(const std::vector<uint8_t> &req, std::vector<float> &res);
 
@@ -176,8 +176,12 @@ namespace sonia_hw_interface
 
         rclcpp::Publisher<sonia_common_ros2::msg::KillStatus>::SharedPtr _publisherKill;
         rclcpp::Publisher<sonia_common_ros2::msg::MissionStatus>::SharedPtr _publisherMission;
-        rclcpp::Publisher<sonia_common_ros2::msg::MotorVoltages>::SharedPtr _publisherMotorVoltages;
-        rclcpp::Publisher<sonia_common_ros2::msg::BatteryVoltage>::SharedPtr _publisherBatteryVoltages;
+        rclcpp::Publisher<sonia_common_ros2::msg::MotorPowerMessages>::SharedPtr _publisherMotorVoltages;
+        rclcpp::Publisher<sonia_common_ros2::msg::BatteryPowerMessages>::SharedPtr _publisherBatteryVoltages;
+        rclcpp::Publisher<sonia_common_ros2::msg::MotorPowerMessages>::SharedPtr _publisherMotorCurrents;
+        rclcpp::Publisher<sonia_common_ros2::msg::BatteryPowerMessages>::SharedPtr _publisherBatteryCurrents;
+        rclcpp::Publisher<sonia_common_ros2::msg::MotorPowerMessages>::SharedPtr _publisherMotorTemperature;
+        rclcpp::Publisher<sonia_common_ros2::msg::BatteryPowerMessages>::SharedPtr _publisherBatteryTemperature;
         rclcpp::Service<sonia_common_ros2::srv::DropperService>::SharedPtr _dropperServer;
         rclcpp::TimerBase::SharedPtr _timerKillMission;
 

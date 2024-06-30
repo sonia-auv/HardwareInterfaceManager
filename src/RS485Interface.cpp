@@ -15,8 +15,12 @@ namespace sonia_hw_interface
         _parser = std::thread(std::bind(&RS485Interface::parseData, this));
         _publisherKill = this->create_publisher<sonia_common_ros2::msg::KillStatus>("/provider_rs485/kill_status", 10);
         _publisherMission = this->create_publisher<sonia_common_ros2::msg::MissionStatus>("/provider_rs485/mission_status", 10);
-        _publisherMotorVoltages = this->create_publisher<sonia_common_ros2::msg::MotorVoltages>("/provider_power/motor_voltages", 10);
-        _publisherBatteryVoltages = this->create_publisher<sonia_common_ros2::msg::BatteryVoltage>("/provider_power/battery_voltages", 10);
+        _publisherMotorVoltages = this->create_publisher<sonia_common_ros2::msg::MotorPowerMessages>("/provider_power/motor_voltages", 10);
+        _publisherMotorCurrents = this->create_publisher<sonia_common_ros2::msg::MotorPowerMessages>("/provider_power/motor_currents", 10);
+        _publisherMotorTemperature = this->create_publisher<sonia_common_ros2::msg::MotorPowerMessages>("/provider_power/motor_temperatures", 10);
+        _publisherBatteryVoltages = this->create_publisher<sonia_common_ros2::msg::BatteryPowerMessages>("/provider_power/battery_voltages", 10);
+        _publisherBatteryCurrents = this->create_publisher<sonia_common_ros2::msg::BatteryPowerMessages>("/provider_power/battery_currents", 10);
+        _publisherBatteryTemperature = this->create_publisher<sonia_common_ros2::msg::BatteryPowerMessages>("/provider_power/battery_temperatures", 10);
         _dropperServer = this->create_service<sonia_common_ros2::srv::DropperService>("actuate_dropper", std::bind(&RS485Interface::processDropperRequest, this, _1, _2));
         _timerKillMission = this->create_wall_timer(500ms, std::bind(&RS485Interface::pollKillMission, this));
         
@@ -111,13 +115,13 @@ namespace sonia_hw_interface
         _publisherMission->publish(state);
     }
 
-    void RS485Interface::publishMotorVoltages(std::vector<float> data)
+    void RS485Interface::publishMotor(uint8_t cmd, std::vector<float> data)
     {
         if (data.size() != 8)
         {
             return;
         }
-        sonia_common_ros2::msg::MotorVoltages msg;
+        sonia_common_ros2::msg::MotorPowerMessages msg;
         msg.motor1 = data[0];
         msg.motor2 = data[1];
         msg.motor3 = data[2];
@@ -127,41 +131,101 @@ namespace sonia_hw_interface
         msg.motor7 = data[6];
         msg.motor8 = data[7];
 
-        _publisherMotorVoltages->publish(msg);
+        switch(cmd)
+        {
+            case _Cmd::CMD_VOLTAGE:
+                _publisherMotorVoltages->publish(msg);
+                break;
+            case _Cmd::CMD_CURRENT:
+                _publisherMotorCurrents->publish(msg);
+                break;
+            case _Cmd::CMD_TEMPERATURE:
+                _publisherMotorTemperature->publish(msg);
+                break;
+            default:
+                break;
+
+        }
     }
 
-    void RS485Interface::publishBatteryVoltages(float *data)
+    void RS485Interface::publishBattery(uint8_t cmd, float *data)
     {
-        sonia_common_ros2::msg::BatteryVoltage msg;
+        sonia_common_ros2::msg::BatteryPowerMessages msg;
         msg.battery1 = data[0];
         msg.battery2 = data[1];
 
-        _publisherBatteryVoltages->publish(msg);
+        switch(cmd)
+        {
+            case _Cmd::CMD_VOLTAGE:
+                _publisherBatteryVoltages->publish(msg);
+                break;
+            case _Cmd::CMD_CURRENT:
+                _publisherBatteryCurrents->publish(msg);
+                break;
+            case _Cmd::CMD_TEMPERATURE:
+                _publisherBatteryTemperature->publish(msg);
+                break;
+            default:
+                break;
+        }
+
     }
 
     void RS485Interface::processPowerManagement(uint8_t cmd, std::vector<uint8_t> data)
     {
-        std::vector<float> voltageData;
+        std::vector<float> powerData;
+        float batteryData[2];
 
         switch (cmd)
         {
         case _Cmd::CMD_VOLTAGE:
 
-            if (convertBytesToFloat(data, voltageData) < 0 || voltageData.size() != _EXPECTED_PWR_VOLT_SIZE)
+            if (convertBytesToFloat(data, powerData) < 0 || powerData.size() != _EXPECTED_PWR_VOLT_SIZE)
             {
                 std::cerr << "ERROR in the message. Dropping VOLTAGE packet" << std::endl;
                 return;
             }
 
-            float batteryData[2];
-            batteryData[0] = voltageData[voltageData.size() - 2];
-            batteryData[1] = voltageData[voltageData.size() - 1];
-            voltageData.pop_back();
-            voltageData.pop_back();
+            batteryData[0] = powerData[powerData.size() - 2];
+            batteryData[1] = powerData[powerData.size() - 1];
+            powerData.pop_back();
+            powerData.pop_back();
 
-            publishMotorVoltages(voltageData);
-            publishBatteryVoltages(batteryData);
+            publishMotor(_Cmd::CMD_VOLTAGE, powerData);
+            publishBattery(_Cmd::CMD_VOLTAGE, batteryData);
 
+            break;
+        case _Cmd::CMD_CURRENT:
+        
+            if (convertBytesToFloat(data, powerData) < 0)
+            {
+                std::cerr << "ERROR in the message. Dropping CURRENT packet" << std::endl;
+                return;
+            }
+
+            batteryData[0] = powerData[powerData.size() - 2];
+            batteryData[1] = powerData[powerData.size() - 1];
+            powerData.pop_back();
+            powerData.pop_back();
+
+            publishMotor(_Cmd::CMD_CURRENT, powerData);
+            publishBattery(_Cmd::CMD_CURRENT, batteryData);
+            break;
+        case _Cmd::CMD_TEMPERATURE:
+
+            if (convertBytesToFloat(data, powerData) < 0)
+            {
+                std::cerr << "ERROR in the message. Dropping TEMPERATURE packet" << std::endl;
+                return;
+            }
+
+            batteryData[0] = powerData[powerData.size() - 2];
+            batteryData[1] = powerData[powerData.size() - 1];
+            powerData.pop_back();
+            powerData.pop_back();
+
+            publishMotor(_Cmd::CMD_TEMPERATURE, powerData);
+            publishBattery(_Cmd::CMD_TEMPERATURE, batteryData);
             break;
 
         default:
@@ -316,7 +380,6 @@ namespace sonia_hw_interface
         return 0;
     }
 
-    
     void RS485Interface::EnableDisableMotors(const std_msgs::msg::Bool &msg)
     {
         queueObject ser;
