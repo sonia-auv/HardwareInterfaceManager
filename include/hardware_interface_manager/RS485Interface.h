@@ -10,6 +10,7 @@
 #include "sonia_common_ros2/msg/serial_message.hpp"
 #include "sonia_common_ros2/msg/kill_status.hpp"
 #include "sonia_common_ros2/msg/mission_status.hpp"
+#include "sonia_common_ros2/msg/motor_feedback.hpp"
 #include "sonia_common_ros2/msg/motor_power_messages.hpp"
 #include "sonia_common_ros2/msg/battery_power_messages.hpp"
 #include "sonia_common_ros2/srv/dropper_service.hpp"
@@ -17,8 +18,6 @@
 #include <std_srvs/srv/empty.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include "SharedQueue.h"
-
-
 
 namespace sonia_hw_interface
 {
@@ -157,6 +156,11 @@ namespace sonia_hw_interface
 
         void publishBattery(uint8_t cmd, float *data);
 
+        void publishMotorFeedback(std::vector<uint8_t> data);
+
+        void EnableDisableMotors(const std_msgs::msg::Bool &msg);
+        void PwmCallback(const sonia_common_ros2::msg::MotorPwm &msg);
+
         int convertBytesToFloat(const std::vector<uint8_t> &req, std::vector<float> &res);
 
         union _bytesToFloat
@@ -182,6 +186,7 @@ namespace sonia_hw_interface
         rclcpp::Publisher<sonia_common_ros2::msg::BatteryPowerMessages>::SharedPtr _publisherBatteryCurrents;
         rclcpp::Publisher<sonia_common_ros2::msg::MotorPowerMessages>::SharedPtr _publisherMotorTemperature;
         rclcpp::Publisher<sonia_common_ros2::msg::BatteryPowerMessages>::SharedPtr _publisherBatteryTemperature;
+        rclcpp::Publisher<sonia_common_ros2::msg::MotorFeedback>::SharedPtr _publisherMotorFeedback;
         rclcpp::Service<sonia_common_ros2::srv::DropperService>::SharedPtr _dropperServer;
         rclcpp::TimerBase::SharedPtr _timerKillMission;
 
@@ -194,8 +199,7 @@ namespace sonia_hw_interface
         
         bool _thread_control;
 
-        void EnableDisableMotors(const std_msgs::msg::Bool &msg);
-        void PwmCallback(const sonia_common_ros2::msg::MotorPwm &msg);
+
         
         uint8_t ESC_SLAVE = 0;
 

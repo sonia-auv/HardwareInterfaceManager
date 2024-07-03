@@ -1,4 +1,5 @@
 #include "hardware_interface_manager/RS485Interface.h"
+//#include "RS485Interface.h"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -21,6 +22,7 @@ namespace sonia_hw_interface
         _publisherBatteryVoltages = this->create_publisher<sonia_common_ros2::msg::BatteryPowerMessages>("/provider_power/battery_voltages", 10);
         _publisherBatteryCurrents = this->create_publisher<sonia_common_ros2::msg::BatteryPowerMessages>("/provider_power/battery_currents", 10);
         _publisherBatteryTemperature = this->create_publisher<sonia_common_ros2::msg::BatteryPowerMessages>("/provider_power/battery_temperatures", 10);
+        _publisherMotorFeedback = this->create_publisher<sonia_common_ros2::msg::MotorFeedback>("/provider_power/motor_feedback", 10);
         _dropperServer = this->create_service<sonia_common_ros2::srv::DropperService>("actuate_dropper", std::bind(&RS485Interface::processDropperRequest, this, _1, _2));
         _timerKillMission = this->create_wall_timer(500ms, std::bind(&RS485Interface::pollKillMission, this));
         
@@ -171,6 +173,19 @@ namespace sonia_hw_interface
 
     }
 
+    void RS485Interface::publishMotorFeedback(std::vector<uint8_t> data)
+    {
+        sonia_common_ros2::msg::MotorFeedback msg;
+        msg.motor1 = data[0];
+        msg.motor2 = data[1];
+        msg.motor3 = data[2];
+        msg.motor4 = data[3];
+        msg.motor5 = data[4];
+        msg.motor6 = data[5];
+        msg.motor7 = data[6];
+        msg.motor8 = data[7];
+        _publisherMotorFeedback->publish(msg);
+    }
     void RS485Interface::processPowerManagement(uint8_t cmd, std::vector<uint8_t> data)
     {
         std::vector<float> powerData;
@@ -227,7 +242,15 @@ namespace sonia_hw_interface
             publishMotor(_Cmd::CMD_TEMPERATURE, powerData);
             publishBattery(_Cmd::CMD_TEMPERATURE, batteryData);
             break;
-
+        case _Cmd::CMD_READ_MOTOR:
+            
+            if (powerData.size() !=nb_thruster)
+            {
+                std::cerr << "ERROR in the message. Dropping READ MOTOR packet" << std::endl;
+                return;
+            }
+            publishMotorFeedback(data);
+            break;
         default:
             break;
         }
