@@ -34,9 +34,11 @@ namespace sonia_hw_interface
             auv = std::getenv("AUV");
             if (!strcmp(auv, "AUV8")|| !strcmp(auv, "LOCAL")){
                 ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
+                std::cerr << "Slave on AUV8" << std::endl;
             }
             else {
                 ESC_SLAVE = _SlaveId::SLAVE_ESC;
+                std::cerr << "Slave on AUV7" << std::endl;
             }
         }catch(...){
             ESC_SLAVE = _SlaveId::SLAVE_ESC;
@@ -244,12 +246,12 @@ namespace sonia_hw_interface
             break;
         case _Cmd::CMD_READ_MOTOR:
             
-            if (powerData.size() !=nb_thruster)
-            {
-                std::cerr << "ERROR in the message. Dropping READ MOTOR packet" << std::endl;
-                return;
-            }
-            publishMotorFeedback(data);
+            //if (powerData.size() !=nb_thruster)
+            //{
+             //   std::cerr << "ERROR in the message. Dropping READ MOTOR packet" << std::endl;
+            //    return;
+            //}
+            //publishMotorFeedback(data);
             break;
         default:
             break;
@@ -429,7 +431,7 @@ namespace sonia_hw_interface
     {
         queueObject ser;
 
-        ser.slave=ESC_SLAVE;
+        ser.slave=_SlaveId::SLAVE_PWR_MANAGEMENT;
         ser.cmd= _Cmd::CMD_PWM;
         
         ser.data.push_back(msg.motor1>>8);
