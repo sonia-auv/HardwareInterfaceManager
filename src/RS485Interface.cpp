@@ -30,7 +30,7 @@ namespace sonia_hw_interface
         _subscriberThrusterPwm = this->create_subscription<sonia_common_ros2::msg::MotorPwm>("/provider_thruster/thruster_pwm",10,std::bind(&RS485Interface::PwmCallback, this,_1));
         _subscriberMotorOnOff=this->create_subscription<std_msgs::msg::Bool>("/provider_power/activate_motors",10,std::bind(&RS485Interface::EnableDisableMotors, this,_1));
         
-        try{
+        /*try{
             auv = std::getenv("AUV");
             if (!strcmp(auv, "AUV8")|| !strcmp(auv, "LOCAL")){
                 ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
@@ -42,8 +42,9 @@ namespace sonia_hw_interface
             }
         }catch(...){
             ESC_SLAVE = _SlaveId::SLAVE_ESC;
-        }
-        
+        }*/
+        auv = std::getenv("AUV");
+        ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
     }
 
     // node destructor
