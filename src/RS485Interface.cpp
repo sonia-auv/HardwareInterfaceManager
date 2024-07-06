@@ -173,7 +173,6 @@ namespace sonia_hw_interface
             default:
                 break;
         }
-
     }
 
     void RS485Interface::publishMotorFeedback(std::vector<uint8_t> data)
@@ -191,63 +190,65 @@ namespace sonia_hw_interface
     }
     void RS485Interface::processPowerManagement(uint8_t cmd, std::vector<uint8_t> data)
     {
-        std::vector<float> powerData;
+        std::vector<float> motorData;
         float batteryData[2];
 
         switch (cmd)
         {
         case _Cmd::CMD_VOLTAGE:
 
-            if (convertBytesToFloat(data, powerData) < 0 || powerData.size() != _EXPECTED_PWR_VOLT_SIZE)
+            if (convertBytesToFloat(data, motorData) < 0 || motorData.size() != _EXPECTED_PWR_VOLT_SIZE)
             {
                 std::cerr << "ERROR in the message. Dropping VOLTAGE packet" << std::endl;
                 return;
             }
-
-            batteryData[0] = powerData[powerData.size() - 2];
-            batteryData[1] = powerData[powerData.size() - 1];
-            powerData.pop_back();
-            powerData.pop_back();
-
-            publishMotor(_Cmd::CMD_VOLTAGE, powerData);
+            
+            batteryData[0] = motorData[motorData.size() - 2];
+            batteryData[1] = motorData[motorData.size() - 1];
+            motorData.pop_back();
+            motorData.pop_back();
+            std::cerr << "cmd_volt: " <<cmd<< std::endl;
+            std::cerr << "battery1: " <<batteryData[0]<<"battery2: "<<batteryData[1]<< std::endl;
+            std::cerr << "motor1: " <<motorData.front()<<"motor2: "<<motorData[1]<< std::endl;
+            publishMotor(_Cmd::CMD_VOLTAGE, motorData);
             publishBattery(_Cmd::CMD_VOLTAGE, batteryData);
 
             break;
         case _Cmd::CMD_CURRENT:
         
-            if (convertBytesToFloat(data, powerData) < 0)
+            if (convertBytesToFloat(data, motorData) < 0)
             {
                 std::cerr << "ERROR in the message. Dropping CURRENT packet" << std::endl;
                 return;
             }
 
-            batteryData[0] = powerData[powerData.size() - 2];
-            batteryData[1] = powerData[powerData.size() - 1];
-            powerData.pop_back();
-            powerData.pop_back();
+            batteryData[0] = motorData[motorData.size() - 2];
+            batteryData[1] = motorData[motorData.size() - 1];
+            motorData.pop_back();
+            motorData.pop_back();
 
-            publishMotor(_Cmd::CMD_CURRENT, powerData);
+            publishMotor(_Cmd::CMD_CURRENT, motorData);
             publishBattery(_Cmd::CMD_CURRENT, batteryData);
             break;
         case _Cmd::CMD_TEMPERATURE:
 
-            if (convertBytesToFloat(data, powerData) < 0)
+            if (convertBytesToFloat(data, motorData) < 0)
             {
                 std::cerr << "ERROR in the message. Dropping TEMPERATURE packet" << std::endl;
                 return;
             }
 
-            batteryData[0] = powerData[powerData.size() - 2];
-            batteryData[1] = powerData[powerData.size() - 1];
-            powerData.pop_back();
-            powerData.pop_back();
+            batteryData[0] = motorData[motorData.size() - 2];
+            batteryData[1] = motorData[motorData.size() - 1];
+            motorData.pop_back();
+            motorData.pop_back();
 
-            publishMotor(_Cmd::CMD_TEMPERATURE, powerData);
+            publishMotor(_Cmd::CMD_TEMPERATURE, motorData);
             publishBattery(_Cmd::CMD_TEMPERATURE, batteryData);
             break;
         case _Cmd::CMD_READ_MOTOR:
             
-            //if (powerData.size() !=nb_thruster)
+            //if (motorData.size() !=nb_thruster)
             //{
              //   std::cerr << "ERROR in the message. Dropping READ MOTOR packet" << std::endl;
             //    return;
