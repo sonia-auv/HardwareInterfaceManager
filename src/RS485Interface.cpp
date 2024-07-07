@@ -188,7 +188,7 @@ namespace sonia_hw_interface
         msg.motor8 = data[7];
         _publisherMotorFeedback->publish(msg);
     }
-    void RS485Interface::processPowerManagement(uint8_t cmd, std::vector<uint8_t> data)
+    void RS485Interface::processPowerManagement(const uint8_t cmd, const std::vector<uint8_t> data)
     {
         std::vector<float> motorData;
         float batteryData[2];
@@ -196,6 +196,7 @@ namespace sonia_hw_interface
         switch (cmd)
         {
         case _Cmd::CMD_VOLTAGE:
+            std::cerr << "cmd volt: "<<cmd<< std::endl;
 
             if (convertBytesToFloat(data, motorData) < 0 || motorData.size() != _EXPECTED_PWR_VOLT_SIZE)
             {
@@ -317,7 +318,7 @@ namespace sonia_hw_interface
 
     void RS485Interface::parseData()
     {
-
+        
         while (_thread_control)
         {
 

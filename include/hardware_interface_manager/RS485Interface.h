@@ -136,7 +136,7 @@ namespace sonia_hw_interface
          */
         void processDropperRequest(const std::shared_ptr<sonia_common_ros2::srv::DropperService::Request> request, std::shared_ptr<sonia_common_ros2::srv::DropperService::Response> response);
 
-        void processPowerManagement(uint8_t cmd, std::vector<uint8_t> data);
+        void processPowerManagement(const uint8_t cmd, const std::vector<uint8_t> data);
 
         /**
          * @brief
