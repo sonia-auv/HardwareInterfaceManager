@@ -174,6 +174,7 @@ namespace sonia_hw_interface
         const u_int8_t _END_BYTE = 0x0D;
         const uint8_t _GET_KILL_STATUS_MSG[8] = {0x3A, 4, 1, 1, 0, 0, 77, 0x0D};
         const uint8_t _GET_MISSION_STATUS_MSG[8] = {0x3A, 4, 0, 1, 1, 0, 77, 0x0D};
+        const uint8_t _GET_POWER_MSG[8] = {0x3A, 8, 0, 8, 1, 0, 77, 0x0D};
         const uint8_t _EXPECTED_PWR_VOLT_SIZE = 10;
 
         sonia_common_cpp::SerialConn _rs485Connection;

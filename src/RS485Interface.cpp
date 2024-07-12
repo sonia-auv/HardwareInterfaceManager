@@ -69,7 +69,8 @@ namespace sonia_hw_interface
         // Wait for a short duration to allow for processing
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
         // Transmit request to get mission status
-        _rs485Connection.Transmit(_GET_MISSION_STATUS_MSG, 8);
+        //_rs485Connection.Transmit(_GET_MISSION_STATUS_MSG, 8);
+        _rs485Connection.Transmit(_GET_POWER_MSG, 8);
     }
 
     std::tuple<uint8_t, uint8_t> RS485Interface::checkSum(uint8_t slave, uint8_t cmd, uint8_t nbByte, std::vector<uint8_t> data)
