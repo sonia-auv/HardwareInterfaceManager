@@ -159,6 +159,7 @@ namespace sonia_hw_interface
         void publishMotorFeedback(std::vector<uint8_t> data);
 
         void EnableDisableMotors(const std_msgs::msg::Bool &msg);
+        void ToggleMotors(const bool state, uint8_t size, std::vector<uint8_t> &data);
         void PwmCallback(const sonia_common_ros2::msg::MotorPwm &msg);
 
         int convertBytesToFloat(const std::vector<uint8_t> &req, std::vector<float> &res);
@@ -202,7 +203,7 @@ namespace sonia_hw_interface
 
 
         
-        uint8_t ESC_SLAVE = 0;
+        uint8_t ESC_SLAVE;
 
         rclcpp::Publisher<sonia_common_ros2::msg::MotorPwm>::SharedPtr _publisherThrusterPwm;
         rclcpp::Subscription<sonia_common_ros2::msg::MotorPwm>::SharedPtr _subscriberThrusterPwm;

@@ -1,5 +1,6 @@
 #include "hardware_interface_manager/RS485Interface.h"
 //#include "RS485Interface.h"
+//#include "RS485Interface.h"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -11,6 +12,20 @@ namespace sonia_hw_interface
     RS485Interface::RS485Interface()
         : Node("rs485_interface"), _rs485Connection("/dev/RS485", B115200, false), _thread_control(true)
     {
+        try{
+            auv = std::getenv("AUV");
+            if (strcmp(auv, "AUV8")|| strcmp(auv, "LOCAL")){
+                ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
+                std::cerr << "Slave on AUV8" << std::endl;
+            }
+            else {
+                ESC_SLAVE = _SlaveId::SLAVE_ESC;
+                std::cerr << "Slave on AUV7" << std::endl;
+            }
+        }catch(...){
+            ESC_SLAVE = _SlaveId::SLAVE_ESC;
+        }
+
         _reader = std::thread(std::bind(&RS485Interface::readData, this));
         _writer = std::thread(std::bind(&RS485Interface::writeData, this));
         _parser = std::thread(std::bind(&RS485Interface::parseData, this));
@@ -30,21 +45,9 @@ namespace sonia_hw_interface
         _subscriberThrusterPwm = this->create_subscription<sonia_common_ros2::msg::MotorPwm>("/provider_thruster/thruster_pwm",10,std::bind(&RS485Interface::PwmCallback, this,_1));
         _subscriberMotorOnOff=this->create_subscription<std_msgs::msg::Bool>("/provider_power/activate_motors",10,std::bind(&RS485Interface::EnableDisableMotors, this,_1));
         
-        /*try{
-            auv = std::getenv("AUV");
-            if (!strcmp(auv, "AUV8")|| !strcmp(auv, "LOCAL")){
-                ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
-                std::cerr << "Slave on AUV8" << std::endl;
-            }
-            else {
-                ESC_SLAVE = _SlaveId::SLAVE_ESC;
-                std::cerr << "Slave on AUV7" << std::endl;
-            }
-        }catch(...){
-            ESC_SLAVE = _SlaveId::SLAVE_ESC;
-        }*/
-        auv = std::getenv("AUV");
-        ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
+        
+        //auv = std::getenv("AUV");
+        //ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
     }
 
     // node destructor
@@ -412,57 +415,130 @@ namespace sonia_hw_interface
     void RS485Interface::EnableDisableMotors(const std_msgs::msg::Bool &msg)
     {
         queueObject ser;
-        ser.slave = _SlaveId::SLAVE_PWR_MANAGEMENT;
         ser.cmd = _Cmd::CMD_ACT_MOTOR;
-        if(msg.data){            
-            for (size_t i = 0; i < 8; i++)
+        switch (ESC_SLAVE)
+        {
+        //AUV8 motor control
+        case _SlaveId::SLAVE_PWR_MANAGEMENT:
+            ser.slave=ESC_SLAVE;
+            ToggleMotors(msg.data,nb_thruster,ser.data);
+            _writerQueue.push_back(ser);
+            break;
+        //AUV7 motor control
+        case _SlaveId::SLAVE_ESC:
+            ser.slave=_SlaveId::SLAVE_PSU0;
+            ser.data.clear();
+            ToggleMotors(msg.data,nb_thruster/4,ser.data);
+            _writerQueue.push_back(ser);
+
+            ser.slave=_SlaveId::SLAVE_PSU1;
+            ser.data.clear();
+            ToggleMotors(msg.data,nb_thruster/4,ser.data);
+            _writerQueue.push_back(ser);
+
+            ser.slave=_SlaveId::SLAVE_PSU2;
+            ser.data.clear();
+            ToggleMotors(msg.data,nb_thruster/4,ser.data);
+            _writerQueue.push_back(ser);
+
+            ser.slave=_SlaveId::SLAVE_PSU3;
+            ser.data.clear();
+            ToggleMotors(msg.data,nb_thruster/4,ser.data);
+            _writerQueue.push_back(ser);
+            break;
+        default:
+            break;
+        }
+    }
+    void RS485Interface::ToggleMotors(const bool state, uint8_t size, std::vector<uint8_t> &data)
+    {
+        if(state){            
+            for (size_t i = 0; i < size; i++)
             {
-                ser.data.push_back(1);
+                data.push_back(1);
             }
         }
         else
         {
-            for (size_t i = 0; i < 8; i++)
+            for (size_t i = 0; i < size; i++)
             {
-                ser.data.push_back(0);
+                data.push_back(0);
             }
         }
-        _writerQueue.push_back(ser);
-        
-
     }
     void RS485Interface::PwmCallback(const sonia_common_ros2::msg::MotorPwm &msg)
     {
         queueObject ser;
-
-        ser.slave=_SlaveId::SLAVE_PWR_MANAGEMENT;
         ser.cmd= _Cmd::CMD_PWM;
+        switch (ESC_SLAVE)
+        {
+        case _SlaveId::SLAVE_PWR_MANAGEMENT:
+            ser.slave=ESC_SLAVE;
+                       
+            ser.data.push_back(msg.motor1>>8);
+            ser.data.push_back(msg.motor1 & 0xFF);
+
+            ser.data.push_back(msg.motor2>>8);
+            ser.data.push_back(msg.motor2 & 0xFF);
+
+            ser.data.push_back(msg.motor3>>8);
+            ser.data.push_back(msg.motor3 & 0xFF);
+
+            ser.data.push_back(msg.motor4>>8);
+            ser.data.push_back(msg.motor4 & 0xFF);
+
+            ser.data.push_back(msg.motor5>>8);
+            ser.data.push_back(msg.motor5 & 0xFF);
+
+            ser.data.push_back(msg.motor6>>8);
+            ser.data.push_back(msg.motor6 & 0xFF);
+
+            ser.data.push_back(msg.motor7>>8);
+            ser.data.push_back(msg.motor7 & 0xFF);
+
+            ser.data.push_back(msg.motor8>>8);
+            ser.data.push_back(msg.motor8 & 0xFF);
         
-        ser.data.push_back(msg.motor1>>8);
-        ser.data.push_back(msg.motor1 & 0xFF);
+            _writerQueue.push_back(ser);
+            break;
+        case _SlaveId::SLAVE_ESC:
+            ser.slave=_SlaveId::SLAVE_PSU0;
+            ser.data.clear();
+            ser.data.push_back(msg.motor1>>8);
+            ser.data.push_back(msg.motor1 & 0xFF);
+            ser.data.push_back(msg.motor5>>8);
+            ser.data.push_back(msg.motor5 & 0xFF);
+            _writerQueue.push_back(ser);
 
-        ser.data.push_back(msg.motor2>>8);
-        ser.data.push_back(msg.motor2 & 0xFF);
+            ser.slave=_SlaveId::SLAVE_PSU1;
+            ser.data.clear();
+            ser.data.push_back(msg.motor2>>8);
+            ser.data.push_back(msg.motor2 & 0xFF);
+            ser.data.push_back(msg.motor6>>8);
+            ser.data.push_back(msg.motor6 & 0xFF);
+            _writerQueue.push_back(ser);
 
-        ser.data.push_back(msg.motor3>>8);
-        ser.data.push_back(msg.motor3 & 0xFF);
+            ser.slave=_SlaveId::SLAVE_PSU2;
+            ser.data.clear();
+            ser.data.push_back(msg.motor3>>8);
+            ser.data.push_back(msg.motor3 & 0xFF);
+            ser.data.push_back(msg.motor7>>8);
+            ser.data.push_back(msg.motor7 & 0xFF);
+            _writerQueue.push_back(ser);
 
-        ser.data.push_back(msg.motor4>>8);
-        ser.data.push_back(msg.motor4 & 0xFF);
-
-        ser.data.push_back(msg.motor5>>8);
-        ser.data.push_back(msg.motor5 & 0xFF);
-
-        ser.data.push_back(msg.motor6>>8);
-        ser.data.push_back(msg.motor6 & 0xFF);
-
-        ser.data.push_back(msg.motor7>>8);
-        ser.data.push_back(msg.motor7 & 0xFF);
-
-        ser.data.push_back(msg.motor8>>8);
-        ser.data.push_back(msg.motor8 & 0xFF);
-    
-        _writerQueue.push_back(ser); 
+            ser.slave=_SlaveId::SLAVE_PSU3;
+            ser.data.clear();
+            ser.data.push_back(msg.motor4>>8);
+            ser.data.push_back(msg.motor4 & 0xFF);
+            ser.data.push_back(msg.motor8>>8);
+            ser.data.push_back(msg.motor8 & 0xFF);
+            _writerQueue.push_back(ser);
+            break;
+        
+        default:
+            break;
+        }
+         
     }
 
 }
