@@ -1,6 +1,6 @@
 #include "hardware_interface_manager/RS485Interface.h"
-//#include "RS485Interface.h"
-//#include "RS485Interface.h"
+// #include "RS485Interface.h"
+// #include "RS485Interface.h"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -12,17 +12,23 @@ namespace sonia_hw_interface
     RS485Interface::RS485Interface()
         : Node("rs485_interface"), _rs485Connection("/dev/RS485", B115200, false), _thread_control(true)
     {
-        try{
+        try
+        {
             auv = std::getenv("AUV");
-            if (strcmp(auv, "AUV8")|| strcmp(auv, "LOCAL")){
+            if (strcmp(auv, "AUV8") || strcmp(auv, "LOCAL"))
+            {
                 ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
-                std::cerr << "Slave on AUV8" << std::endl;
+                RCLCPP_INFO(this->get_logger(), "Slave on AUV8");
+                // std::cerr << "Slave on AUV8" << std::endl;
             }
-            else {
+            else
+            {
                 ESC_SLAVE = _SlaveId::SLAVE_ESC;
                 std::cerr << "Slave on AUV7" << std::endl;
             }
-        }catch(...){
+        }
+        catch (...)
+        {
             ESC_SLAVE = _SlaveId::SLAVE_ESC;
         }
 
@@ -40,14 +46,13 @@ namespace sonia_hw_interface
         _publisherMotorFeedback = this->create_publisher<sonia_common_ros2::msg::MotorFeedback>("/provider_power/motor_feedback", 10);
         _dropperServer = this->create_service<sonia_common_ros2::srv::DropperService>("actuate_dropper", std::bind(&RS485Interface::processDropperRequest, this, _1, _2));
         _timerKillMission = this->create_wall_timer(500ms, std::bind(&RS485Interface::pollKillMission, this));
-        
-        _publisherThrusterPwm = this->create_publisher<sonia_common_ros2::msg::MotorPwm>("/provider_thruster/thruster_pwm",10);
-        _subscriberThrusterPwm = this->create_subscription<sonia_common_ros2::msg::MotorPwm>("/provider_thruster/thruster_pwm",10,std::bind(&RS485Interface::PwmCallback, this,_1));
-        _subscriberMotorOnOff=this->create_subscription<std_msgs::msg::Bool>("/provider_power/activate_motors",10,std::bind(&RS485Interface::EnableDisableMotors, this,_1));
-        
-        
-        //auv = std::getenv("AUV");
-        //ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
+
+        _publisherThrusterPwm = this->create_publisher<sonia_common_ros2::msg::MotorPwm>("/provider_thruster/thruster_pwm", 10);
+        _subscriberThrusterPwm = this->create_subscription<sonia_common_ros2::msg::MotorPwm>("/provider_thruster/thruster_pwm", 10, std::bind(&RS485Interface::PwmCallback, this, _1));
+        _subscriberMotorOnOff = this->create_subscription<std_msgs::msg::Bool>("/provider_power/activate_motors", 10, std::bind(&RS485Interface::EnableDisableMotors, this, _1));
+
+        // auv = std::getenv("AUV");
+        // ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
     }
 
     // node destructor
@@ -73,7 +78,8 @@ namespace sonia_hw_interface
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
         // Transmit request to get mission status
         _rs485Connection.Transmit(_GET_MISSION_STATUS_MSG, 8);
-        _rs485Connection.Transmit(_GET_POWER_MSG, 8);
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        _rs485Connection.Transmit(_GET_POWER_MSG, 15);
     }
 
     std::tuple<uint8_t, uint8_t> RS485Interface::checkSum(uint8_t slave, uint8_t cmd, uint8_t nbByte, std::vector<uint8_t> data)
@@ -140,20 +146,19 @@ namespace sonia_hw_interface
         msg.motor7 = data[6];
         msg.motor8 = data[7];
 
-        switch(cmd)
+        switch (cmd)
         {
-            case _Cmd::CMD_VOLTAGE:
-                _publisherMotorVoltages->publish(msg);
-                break;
-            case _Cmd::CMD_CURRENT:
-                _publisherMotorCurrents->publish(msg);
-                break;
-            case _Cmd::CMD_TEMPERATURE:
-                _publisherMotorTemperature->publish(msg);
-                break;
-            default:
-                break;
-
+        case _Cmd::CMD_VOLTAGE:
+            _publisherMotorVoltages->publish(msg);
+            break;
+        case _Cmd::CMD_CURRENT:
+            _publisherMotorCurrents->publish(msg);
+            break;
+        case _Cmd::CMD_TEMPERATURE:
+            _publisherMotorTemperature->publish(msg);
+            break;
+        default:
+            break;
         }
     }
 
@@ -163,19 +168,19 @@ namespace sonia_hw_interface
         msg.battery1 = data[0];
         msg.battery2 = data[1];
 
-        switch(cmd)
+        switch (cmd)
         {
-            case _Cmd::CMD_VOLTAGE:
-                _publisherBatteryVoltages->publish(msg);
-                break;
-            case _Cmd::CMD_CURRENT:
-                _publisherBatteryCurrents->publish(msg);
-                break;
-            case _Cmd::CMD_TEMPERATURE:
-                _publisherBatteryTemperature->publish(msg);
-                break;
-            default:
-                break;
+        case _Cmd::CMD_VOLTAGE:
+            _publisherBatteryVoltages->publish(msg);
+            break;
+        case _Cmd::CMD_CURRENT:
+            _publisherBatteryCurrents->publish(msg);
+            break;
+        case _Cmd::CMD_TEMPERATURE:
+            _publisherBatteryTemperature->publish(msg);
+            break;
+        default:
+            break;
         }
     }
 
@@ -200,27 +205,27 @@ namespace sonia_hw_interface
         switch (cmd)
         {
         case _Cmd::CMD_VOLTAGE:
-            std::cerr << "cmd volt: "<<cmd<< std::endl;
+            std::cerr << "cmd volt: " << cmd << std::endl;
 
-            if (convertBytesToFloat(data, motorData) < 0 || motorData.size() != _EXPECTED_PWR_VOLT_SIZE)
+            if (convertBytesToFloat(data, motorData) < 0 )
             {
                 std::cerr << "ERROR in the message. Dropping VOLTAGE packet" << std::endl;
                 return;
             }
-            
-            batteryData[0] = motorData[motorData.size() - 2];
-            batteryData[1] = motorData[motorData.size() - 1];
+
+            batteryData[0] = motorData[8];
+            batteryData[1] = motorData[9];
             motorData.pop_back();
             motorData.pop_back();
-            std::cerr << "cmd_volt: " <<cmd<< std::endl;
-            std::cerr << "battery1: " <<batteryData[0]<<"battery2: "<<batteryData[1]<< std::endl;
-            std::cerr << "motor1: " <<motorData.front()<<"motor2: "<<motorData[1]<< std::endl;
+            std::cerr << "cmd_volt: " << (int)cmd << std::endl;
+            std::cerr << "battery1: " << (int)batteryData[0] << " battery2: " << (int)batteryData[1] << std::endl;
+            std::cerr << "motor1: " << motorData.front() << "motor2: " << motorData[1] << std::endl;
             publishMotor(_Cmd::CMD_VOLTAGE, motorData);
             publishBattery(_Cmd::CMD_VOLTAGE, batteryData);
 
             break;
         case _Cmd::CMD_CURRENT:
-        
+
             if (convertBytesToFloat(data, motorData) < 0)
             {
                 std::cerr << "ERROR in the message. Dropping CURRENT packet" << std::endl;
@@ -252,15 +257,16 @@ namespace sonia_hw_interface
             publishBattery(_Cmd::CMD_TEMPERATURE, batteryData);
             break;
         case _Cmd::CMD_READ_MOTOR:
-            
-            //if (motorData.size() !=nb_thruster)
+
+            // if (motorData.size() !=nb_thruster)
             //{
-             //   std::cerr << "ERROR in the message. Dropping READ MOTOR packet" << std::endl;
+            //    std::cerr << "ERROR in the message. Dropping READ MOTOR packet" << std::endl;
             //    return;
             //}
-            //publishMotorFeedback(data);
+            // publishMotorFeedback(data);
             break;
         default:
+            RCLCPP_WARN(this->get_logger(), "CMD Not identified");
             break;
         }
     }
@@ -322,13 +328,18 @@ namespace sonia_hw_interface
 
     void RS485Interface::parseData()
     {
-        
+        union bytesToFloat
+        {
+            uint8_t bytes[4];
+            float value;
+        };
         while (_thread_control)
         {
 
             // read until the start there or the queue is empty
             while (!_parseQueue.empty())
             {
+                std::this_thread::sleep_for(std::chrono::milliseconds(300));
                 // check if the bit is the start bit:
                 if (_parseQueue.front() != _START_BYTE)
                 {
@@ -358,8 +369,8 @@ namespace sonia_hw_interface
                     std::tuple<uint8_t, uint8_t> calc_checksum = checkSum(msg.slave, msg.cmd, nbByte, msg.data);
 
                     // if the checksum is bad, drop the packet
-                    if (checkResult == calc_checksum)
-                    {
+                    // if (checkResult == calc_checksum)
+                    // {
                         // publisher.publish(msg);
                         switch (msg.slave)
                         {
@@ -381,12 +392,24 @@ namespace sonia_hw_interface
                             }
                             break;
                         case _SlaveId::SLAVE_PWR_MANAGEMENT:
+                            // std::cout << "Slave: " << (int)msg.slave << ", ";
+                            // std::cout << "CMD: " << (int)msg.cmd << ", ";
+                            // std::cout << "Size: " << (int)msg.data.size() << std::endl;
+                            // for (size_t i = 0; i < 10; i++)
+                            // {
+                            //     bytesToFloat converter;
+                            //     converter.bytes[0] = msg.data[4 * i];
+                            //     converter.bytes[1] = msg.data[4 * i + 1];
+                            //     converter.bytes[2] = msg.data[4 * i + 2];
+                            //     converter.bytes[3] = msg.data[4 * i + 3];
+                            //     std::cout << "Data[" << i << "]: " << converter.value << std::endl;
+                            // }
                             processPowerManagement(msg.cmd, msg.data);
                             break;
                         default:
                             break;
                         }
-                    }
+                    // }
                     // packet dropped
                 }
             }
@@ -418,32 +441,32 @@ namespace sonia_hw_interface
         ser.cmd = _Cmd::CMD_ACT_MOTOR;
         switch (ESC_SLAVE)
         {
-        //AUV8 motor control
+        // AUV8 motor control
         case _SlaveId::SLAVE_PWR_MANAGEMENT:
-            ser.slave=ESC_SLAVE;
-            ToggleMotors(msg.data,nb_thruster,ser.data);
+            ser.slave = ESC_SLAVE;
+            ToggleMotors(msg.data, nb_thruster, ser.data);
             _writerQueue.push_back(ser);
             break;
-        //AUV7 motor control
+        // AUV7 motor control
         case _SlaveId::SLAVE_ESC:
-            ser.slave=_SlaveId::SLAVE_PSU0;
+            ser.slave = _SlaveId::SLAVE_PSU0;
             ser.data.clear();
-            ToggleMotors(msg.data,nb_thruster/4,ser.data);
+            ToggleMotors(msg.data, nb_thruster / 4, ser.data);
             _writerQueue.push_back(ser);
 
-            ser.slave=_SlaveId::SLAVE_PSU1;
+            ser.slave = _SlaveId::SLAVE_PSU1;
             ser.data.clear();
-            ToggleMotors(msg.data,nb_thruster/4,ser.data);
+            ToggleMotors(msg.data, nb_thruster / 4, ser.data);
             _writerQueue.push_back(ser);
 
-            ser.slave=_SlaveId::SLAVE_PSU2;
+            ser.slave = _SlaveId::SLAVE_PSU2;
             ser.data.clear();
-            ToggleMotors(msg.data,nb_thruster/4,ser.data);
+            ToggleMotors(msg.data, nb_thruster / 4, ser.data);
             _writerQueue.push_back(ser);
 
-            ser.slave=_SlaveId::SLAVE_PSU3;
+            ser.slave = _SlaveId::SLAVE_PSU3;
             ser.data.clear();
-            ToggleMotors(msg.data,nb_thruster/4,ser.data);
+            ToggleMotors(msg.data, nb_thruster / 4, ser.data);
             _writerQueue.push_back(ser);
             break;
         default:
@@ -452,7 +475,8 @@ namespace sonia_hw_interface
     }
     void RS485Interface::ToggleMotors(const bool state, uint8_t size, std::vector<uint8_t> &data)
     {
-        if(state){            
+        if (state)
+        {
             for (size_t i = 0; i < size; i++)
             {
                 data.push_back(1);
@@ -469,76 +493,75 @@ namespace sonia_hw_interface
     void RS485Interface::PwmCallback(const sonia_common_ros2::msg::MotorPwm &msg)
     {
         queueObject ser;
-        ser.cmd= _Cmd::CMD_PWM;
+        ser.cmd = _Cmd::CMD_PWM;
         switch (ESC_SLAVE)
         {
         case _SlaveId::SLAVE_PWR_MANAGEMENT:
-            ser.slave=ESC_SLAVE;
-                       
-            ser.data.push_back(msg.motor1>>8);
+            ser.slave = ESC_SLAVE;
+
+            ser.data.push_back(msg.motor1 >> 8);
             ser.data.push_back(msg.motor1 & 0xFF);
 
-            ser.data.push_back(msg.motor2>>8);
+            ser.data.push_back(msg.motor2 >> 8);
             ser.data.push_back(msg.motor2 & 0xFF);
 
-            ser.data.push_back(msg.motor3>>8);
+            ser.data.push_back(msg.motor3 >> 8);
             ser.data.push_back(msg.motor3 & 0xFF);
 
-            ser.data.push_back(msg.motor4>>8);
+            ser.data.push_back(msg.motor4 >> 8);
             ser.data.push_back(msg.motor4 & 0xFF);
 
-            ser.data.push_back(msg.motor5>>8);
+            ser.data.push_back(msg.motor5 >> 8);
             ser.data.push_back(msg.motor5 & 0xFF);
 
-            ser.data.push_back(msg.motor6>>8);
+            ser.data.push_back(msg.motor6 >> 8);
             ser.data.push_back(msg.motor6 & 0xFF);
 
-            ser.data.push_back(msg.motor7>>8);
+            ser.data.push_back(msg.motor7 >> 8);
             ser.data.push_back(msg.motor7 & 0xFF);
 
-            ser.data.push_back(msg.motor8>>8);
+            ser.data.push_back(msg.motor8 >> 8);
             ser.data.push_back(msg.motor8 & 0xFF);
-        
+
             _writerQueue.push_back(ser);
             break;
         case _SlaveId::SLAVE_ESC:
-            ser.slave=_SlaveId::SLAVE_PSU0;
+            ser.slave = _SlaveId::SLAVE_PSU0;
             ser.data.clear();
-            ser.data.push_back(msg.motor1>>8);
+            ser.data.push_back(msg.motor1 >> 8);
             ser.data.push_back(msg.motor1 & 0xFF);
-            ser.data.push_back(msg.motor5>>8);
+            ser.data.push_back(msg.motor5 >> 8);
             ser.data.push_back(msg.motor5 & 0xFF);
             _writerQueue.push_back(ser);
 
-            ser.slave=_SlaveId::SLAVE_PSU1;
+            ser.slave = _SlaveId::SLAVE_PSU1;
             ser.data.clear();
-            ser.data.push_back(msg.motor2>>8);
+            ser.data.push_back(msg.motor2 >> 8);
             ser.data.push_back(msg.motor2 & 0xFF);
-            ser.data.push_back(msg.motor6>>8);
+            ser.data.push_back(msg.motor6 >> 8);
             ser.data.push_back(msg.motor6 & 0xFF);
             _writerQueue.push_back(ser);
 
-            ser.slave=_SlaveId::SLAVE_PSU2;
+            ser.slave = _SlaveId::SLAVE_PSU2;
             ser.data.clear();
-            ser.data.push_back(msg.motor3>>8);
+            ser.data.push_back(msg.motor3 >> 8);
             ser.data.push_back(msg.motor3 & 0xFF);
-            ser.data.push_back(msg.motor7>>8);
+            ser.data.push_back(msg.motor7 >> 8);
             ser.data.push_back(msg.motor7 & 0xFF);
             _writerQueue.push_back(ser);
 
-            ser.slave=_SlaveId::SLAVE_PSU3;
+            ser.slave = _SlaveId::SLAVE_PSU3;
             ser.data.clear();
-            ser.data.push_back(msg.motor4>>8);
+            ser.data.push_back(msg.motor4 >> 8);
             ser.data.push_back(msg.motor4 & 0xFF);
-            ser.data.push_back(msg.motor8>>8);
+            ser.data.push_back(msg.motor8 >> 8);
             ser.data.push_back(msg.motor8 & 0xFF);
             _writerQueue.push_back(ser);
             break;
-        
+
         default:
             break;
         }
-         
     }
 
 }

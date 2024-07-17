@@ -175,7 +175,7 @@ namespace sonia_hw_interface
         const u_int8_t _END_BYTE = 0x0D;
         const uint8_t _GET_KILL_STATUS_MSG[8] = {0x3A, 4, 1, 1, 0, 0, 77, 0x0D};
         const uint8_t _GET_MISSION_STATUS_MSG[8] = {0x3A, 4, 0, 1, 1, 0, 77, 0x0D};
-        const uint8_t _GET_POWER_MSG[8] = {0x3A, 8, 0, 8, 1, 0, 77, 0x0D};
+        const uint8_t _GET_POWER_MSG[15] = {0x3A, 8, 0, 8, 1, 1, 1, 1, 1, 1, 1, 1, 0, 95, 0x0D};
         const uint8_t _EXPECTED_PWR_VOLT_SIZE = 10;
 
         sonia_common_cpp::SerialConn _rs485Connection;
@@ -198,18 +198,16 @@ namespace sonia_hw_interface
 
         SharedQueue<queueObject> _writerQueue;
         SharedQueue<uint8_t> _parseQueue;
-        
+
         bool _thread_control;
 
-
-        
         uint8_t ESC_SLAVE;
 
         rclcpp::Publisher<sonia_common_ros2::msg::MotorPwm>::SharedPtr _publisherThrusterPwm;
         rclcpp::Subscription<sonia_common_ros2::msg::MotorPwm>::SharedPtr _subscriberThrusterPwm;
         rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr _subscriberMotorOnOff;
 
-        const char* auv;
+        const char *auv;
         const uint8_t nb_thruster = 8;
     };
 
