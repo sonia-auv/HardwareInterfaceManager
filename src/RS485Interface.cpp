@@ -46,13 +46,12 @@ namespace sonia_hw_interface
         _publisherMotorFeedback = this->create_publisher<sonia_common_ros2::msg::MotorFeedback>("/provider_power/motor_feedback", 10);
         _dropperServer = this->create_service<sonia_common_ros2::srv::DropperService>("actuate_dropper", std::bind(&RS485Interface::processDropperRequest, this, _1, _2));
         _timerKillMission = this->create_wall_timer(500ms, std::bind(&RS485Interface::pollKillMission, this));
+        _timerPowerRequest= this->create_wall_timer(500ms, std::bind(&RS485Interface::pollPower, this));
 
         _publisherThrusterPwm = this->create_publisher<sonia_common_ros2::msg::MotorPwm>("/provider_thruster/thruster_pwm", 10);
         _subscriberThrusterPwm = this->create_subscription<sonia_common_ros2::msg::MotorPwm>("/provider_thruster/thruster_pwm", 10, std::bind(&RS485Interface::PwmCallback, this, _1));
         _subscriberMotorOnOff = this->create_subscription<std_msgs::msg::Bool>("/provider_power/activate_motors", 10, std::bind(&RS485Interface::EnableDisableMotors, this, _1));
 
-        // auv = std::getenv("AUV");
-        // ESC_SLAVE = _SlaveId::SLAVE_PWR_MANAGEMENT;
     }
 
     // node destructor
@@ -77,9 +76,17 @@ namespace sonia_hw_interface
         // Wait for a short duration to allow for processing
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
         // Transmit request to get mission status
+        _rs485Connection.Transmit(_GET_MISSION_STATUS_MSG, 8);
+        
+    }
+    void RS485Interface::pollPower()
+    {
+        _rs485Connection.Transmit(_GET_VOLT_MSG, 15);
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
         _rs485Connection.Transmit(_GET_CURRENT_MSG, 15);
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        _rs485Connection.Transmit(_GET_VOLT_MSG, 15);
+        _rs485Connection.Transmit(_GET_TEMP_MSG, 15);
+
     }
 
     std::tuple<uint8_t, uint8_t> RS485Interface::checkSum(uint8_t slave, uint8_t cmd, uint8_t nbByte, std::vector<uint8_t> data)
@@ -256,17 +263,12 @@ namespace sonia_hw_interface
             break;
         case _Cmd::CMD_READ_MOTOR:
 
-            // if (motorData.size() !=nb_thruster)
+            //if (motorData.size() !=nb_thruster)
             //{
-            //    std::cerr << "ERROR in the message. Dropping READ MOTOR packet" << std::endl;
-            //    return;
+                //std::cerr << "ERROR in the message. Dropping READ MOTOR packet" << std::endl;
+              //  return;
             //}
-            std::cerr << "First" << std::endl;
-            for (int i: data){
-                std::cerr << "mot: " << i <<std::endl;
-            }
-            std::cerr << "LAST" << std::endl;
-            //publishMotorFeedback(data);
+            publishMotorFeedback(data);
             break;
         default:
             RCLCPP_WARN(this->get_logger(), "CMD Not identified");
@@ -548,5 +550,4 @@ namespace sonia_hw_interface
             break;
         }
     }
-
 }
