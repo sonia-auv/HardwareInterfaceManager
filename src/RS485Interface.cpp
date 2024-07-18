@@ -77,9 +77,9 @@ namespace sonia_hw_interface
         // Wait for a short duration to allow for processing
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
         // Transmit request to get mission status
-        _rs485Connection.Transmit(_GET_MISSION_STATUS_MSG, 8);
+        _rs485Connection.Transmit(_GET_CURRENT_MSG, 15);
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        _rs485Connection.Transmit(_GET_POWER_MSG, 15);
+        _rs485Connection.Transmit(_GET_VOLT_MSG, 15);
     }
 
     std::tuple<uint8_t, uint8_t> RS485Interface::checkSum(uint8_t slave, uint8_t cmd, uint8_t nbByte, std::vector<uint8_t> data)
@@ -132,10 +132,10 @@ namespace sonia_hw_interface
 
     void RS485Interface::publishMotor(uint8_t cmd, std::vector<float> data)
     {
-        if (data.size() != 8)
+        /*if (data.size() != 8)
         {
             return;
-        }
+        }*/
         sonia_common_ros2::msg::MotorPowerMessages msg;
         msg.motor1 = data[0];
         msg.motor2 = data[1];
@@ -200,40 +200,38 @@ namespace sonia_hw_interface
     void RS485Interface::processPowerManagement(const uint8_t cmd, const std::vector<uint8_t> data)
     {
         std::vector<float> motorData;
+        motorData.reserve(10);
         float batteryData[2];
 
         switch (cmd)
         {
         case _Cmd::CMD_VOLTAGE:
-            std::cerr << "cmd volt: " << cmd << std::endl;
-
-            if (convertBytesToFloat(data, motorData) < 0 )
+            
+            if (convertBytesToFloat(data, motorData, nb_thruster+nb_battery) < 0 )
             {
                 std::cerr << "ERROR in the message. Dropping VOLTAGE packet" << std::endl;
                 return;
             }
-
-            batteryData[0] = motorData[8];
-            batteryData[1] = motorData[9];
+            
+            batteryData[0] = motorData[motorData.size()-2];
+            batteryData[1] = motorData[motorData.size()-1];
             motorData.pop_back();
             motorData.pop_back();
-            std::cerr << "cmd_volt: " << (int)cmd << std::endl;
-            std::cerr << "battery1: " << (int)batteryData[0] << " battery2: " << (int)batteryData[1] << std::endl;
-            std::cerr << "motor1: " << motorData.front() << "motor2: " << motorData[1] << std::endl;
+            
             publishMotor(_Cmd::CMD_VOLTAGE, motorData);
             publishBattery(_Cmd::CMD_VOLTAGE, batteryData);
 
             break;
         case _Cmd::CMD_CURRENT:
-
-            if (convertBytesToFloat(data, motorData) < 0)
+            
+            if (convertBytesToFloat(data, motorData,nb_thruster+nb_battery) < 0)
             {
                 std::cerr << "ERROR in the message. Dropping CURRENT packet" << std::endl;
                 return;
             }
 
-            batteryData[0] = motorData[motorData.size() - 2];
-            batteryData[1] = motorData[motorData.size() - 1];
+            batteryData[0] = motorData[motorData.size()-2];
+            batteryData[1] = motorData[motorData.size()-1];
             motorData.pop_back();
             motorData.pop_back();
 
@@ -241,8 +239,8 @@ namespace sonia_hw_interface
             publishBattery(_Cmd::CMD_CURRENT, batteryData);
             break;
         case _Cmd::CMD_TEMPERATURE:
-
-            if (convertBytesToFloat(data, motorData) < 0)
+            
+            if (convertBytesToFloat(data, motorData, nb_thruster+nb_battery) < 0)
             {
                 std::cerr << "ERROR in the message. Dropping TEMPERATURE packet" << std::endl;
                 return;
@@ -263,7 +261,12 @@ namespace sonia_hw_interface
             //    std::cerr << "ERROR in the message. Dropping READ MOTOR packet" << std::endl;
             //    return;
             //}
-            // publishMotorFeedback(data);
+            std::cerr << "First" << std::endl;
+            for (int i: data){
+                std::cerr << "mot: " << i <<std::endl;
+            }
+            std::cerr << "LAST" << std::endl;
+            //publishMotorFeedback(data);
             break;
         default:
             RCLCPP_WARN(this->get_logger(), "CMD Not identified");
@@ -328,18 +331,13 @@ namespace sonia_hw_interface
 
     void RS485Interface::parseData()
     {
-        union bytesToFloat
-        {
-            uint8_t bytes[4];
-            float value;
-        };
         while (_thread_control)
         {
-
+            std::this_thread::sleep_for(std::chrono::milliseconds(300));
             // read until the start there or the queue is empty
             while (!_parseQueue.empty())
             {
-                std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                
                 // check if the bit is the start bit:
                 if (_parseQueue.front() != _START_BYTE)
                 {
@@ -361,16 +359,15 @@ namespace sonia_hw_interface
                         msg.data.push_back(_parseQueue.get_n_pop_front());
                     }
 
-                    std::tuple<uint8_t, uint8_t> checkResult = {(_parseQueue.get_n_pop_front() << 8), _parseQueue.get_n_pop_front()};
-
+                    std::tuple<uint8_t, uint8_t> checkResult = {(_parseQueue.get_n_pop_front()), _parseQueue.get_n_pop_front()};
+                    
                     // pop the unused end data
                     _parseQueue.pop_front();
 
                     std::tuple<uint8_t, uint8_t> calc_checksum = checkSum(msg.slave, msg.cmd, nbByte, msg.data);
-
                     // if the checksum is bad, drop the packet
-                    // if (checkResult == calc_checksum)
-                    // {
+                    if (checkResult == calc_checksum)
+                    {
                         // publisher.publish(msg);
                         switch (msg.slave)
                         {
@@ -391,32 +388,20 @@ namespace sonia_hw_interface
                                 break;
                             }
                             break;
-                        case _SlaveId::SLAVE_PWR_MANAGEMENT:
-                            // std::cout << "Slave: " << (int)msg.slave << ", ";
-                            // std::cout << "CMD: " << (int)msg.cmd << ", ";
-                            // std::cout << "Size: " << (int)msg.data.size() << std::endl;
-                            // for (size_t i = 0; i < 10; i++)
-                            // {
-                            //     bytesToFloat converter;
-                            //     converter.bytes[0] = msg.data[4 * i];
-                            //     converter.bytes[1] = msg.data[4 * i + 1];
-                            //     converter.bytes[2] = msg.data[4 * i + 2];
-                            //     converter.bytes[3] = msg.data[4 * i + 3];
-                            //     std::cout << "Data[" << i << "]: " << converter.value << std::endl;
-                            // }
+                        case _SlaveId::SLAVE_PWR_MANAGEMENT:                         
                             processPowerManagement(msg.cmd, msg.data);
                             break;
                         default:
                             break;
                         }
-                    // }
+                    }
                     // packet dropped
                 }
             }
         }
     }
 
-    int RS485Interface::convertBytesToFloat(const std::vector<uint8_t> &req, std::vector<float> &res)
+    int RS485Interface::convertBytesToFloat(const std::vector<uint8_t> &req, std::vector<float> &res, const size_t size)
     {
         uint8_t size_req = req.size();
         if (size_req % 4 != 0)
@@ -424,7 +409,7 @@ namespace sonia_hw_interface
 
         _bytesToFloat converter;
 
-        for (uint8_t i = 0; i < req.size(); ++i) // shifting of 4 for each data
+        for (uint8_t i = 0; i < size; ++i) // shifting of 4 for each data
         {
             converter.bytes[0] = req[4 * i];
             converter.bytes[1] = req[4 * i + 1];

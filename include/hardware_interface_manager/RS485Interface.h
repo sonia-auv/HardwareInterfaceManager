@@ -162,7 +162,7 @@ namespace sonia_hw_interface
         void ToggleMotors(const bool state, uint8_t size, std::vector<uint8_t> &data);
         void PwmCallback(const sonia_common_ros2::msg::MotorPwm &msg);
 
-        int convertBytesToFloat(const std::vector<uint8_t> &req, std::vector<float> &res);
+        int convertBytesToFloat(const std::vector<uint8_t> &req, std::vector<float> &res, const size_t size);
 
         union _bytesToFloat
         {
@@ -170,12 +170,16 @@ namespace sonia_hw_interface
             float_t value;
         };
 
+        const uint8_t nb_thruster = 8;
+        const uint8_t nb_battery = 2;
         static const int _DATA_READ_CHUNCK = 1024;
         const u_int8_t _START_BYTE = 0x3A;
         const u_int8_t _END_BYTE = 0x0D;
         const uint8_t _GET_KILL_STATUS_MSG[8] = {0x3A, 4, 1, 1, 0, 0, 77, 0x0D};
         const uint8_t _GET_MISSION_STATUS_MSG[8] = {0x3A, 4, 0, 1, 1, 0, 77, 0x0D};
-        const uint8_t _GET_POWER_MSG[15] = {0x3A, 8, 0, 8, 1, 1, 1, 1, 1, 1, 1, 1, 0, 95, 0x0D};
+        const uint8_t _GET_VOLT_MSG[15] = {0x3A, 8, 0, 8, 1, 1, 1, 1, 1, 1, 1, 1, 0, 95, 0x0D};
+        const uint8_t _GET_TEMP_MSG[15] = {0x3A, 8, 2, 8, 1, 1, 1, 1, 1, 1, 1, 1, 0, 95, 0x0D};
+        const uint8_t _GET_CURRENT_MSG[15] = {0x3A, 8, 1, 8, 1, 1, 1, 1, 1, 1, 1, 1, 0, 95, 0x0D};
         const uint8_t _EXPECTED_PWR_VOLT_SIZE = 10;
 
         sonia_common_cpp::SerialConn _rs485Connection;
@@ -208,7 +212,7 @@ namespace sonia_hw_interface
         rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr _subscriberMotorOnOff;
 
         const char *auv;
-        const uint8_t nb_thruster = 8;
+        
     };
 
 }
