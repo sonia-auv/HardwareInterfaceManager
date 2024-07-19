@@ -81,11 +81,13 @@ namespace sonia_hw_interface
     }
     void RS485Interface::pollPower()
     {
-        _rs485Connection.Transmit(_GET_VOLT_MSG, 15);
+        _rs485Connection.Transmit(_GET_POWER_MSG, 15);
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        _rs485Connection.Transmit(_GET_CURRENT_MSG, 15);
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        _rs485Connection.Transmit(_GET_TEMP_MSG, 15);
+        //_rs485Connection.Transmit(_GET_CURRENT_MSG, 15);
+        //std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        //_rs485Connection.Transmit(_GET_TEMP_MSG, 15);
+        //std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        _rs485Connection.Transmit(_GET_FEEDBACK_MSG, 15);
 
     }
 
