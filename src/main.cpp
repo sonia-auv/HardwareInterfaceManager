@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
         printf("Could not open port...\n");
         return EXIT_FAILURE;
     }
-    rclcpp::executors::MultiThreadedExecutor executor(rclcpp::ExecutorOptions(),3);
+    rclcpp::executors::MultiThreadedExecutor executor;
     executor.add_node(thrust);
     executor.spin();
     //rclcpp::spin(thrust);

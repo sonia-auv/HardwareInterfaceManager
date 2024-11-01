@@ -205,6 +205,7 @@ namespace sonia_hw_interface
         std::thread _parser;
         std::thread _writer;
 
+        rclcpp::CallbackGroup::SharedPtr group1;
         SharedQueue<queueObject> _writerQueue;
         SharedQueue<uint8_t> _parseQueue;
 

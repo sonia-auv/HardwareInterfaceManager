@@ -32,6 +32,10 @@ namespace sonia_hw_interface
             ESC_SLAVE = _SlaveId::SLAVE_ESC;
         }
 
+        group1 = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+        auto sub_opt= rclcpp::SubscriptionOptions();
+        sub_opt.callback_group= group1;
+
         _reader = std::thread(std::bind(&RS485Interface::readData, this));
         _writer = std::thread(std::bind(&RS485Interface::writeData, this));
         _parser = std::thread(std::bind(&RS485Interface::parseData, this));
@@ -49,8 +53,8 @@ namespace sonia_hw_interface
         _timerPowerRequest= this->create_wall_timer(500ms, std::bind(&RS485Interface::pollPower, this));
 
         _publisherThrusterPwm = this->create_publisher<sonia_common_ros2::msg::MotorPwm>("/provider_thruster/thruster_pwm", 10);
-        _subscriberThrusterPwm = this->create_subscription<sonia_common_ros2::msg::MotorPwm>("/provider_thruster/thruster_pwm", 10, std::bind(&RS485Interface::PwmCallback, this, _1));
-        _subscriberMotorOnOff = this->create_subscription<std_msgs::msg::Bool>("/provider_power/activate_motors", 10, std::bind(&RS485Interface::EnableDisableMotors, this, _1));
+        _subscriberThrusterPwm = this->create_subscription<sonia_common_ros2::msg::MotorPwm>("/provider_thruster/thruster_pwm", 10, std::bind(&RS485Interface::PwmCallback, this, _1), sub_opt);
+        _subscriberMotorOnOff = this->create_subscription<std_msgs::msg::Bool>("/provider_power/activate_motors", 10, std::bind(&RS485Interface::EnableDisableMotors, this, _1), sub_opt);
 
     }
 
