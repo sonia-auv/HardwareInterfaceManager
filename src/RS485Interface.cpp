@@ -76,22 +76,26 @@ namespace sonia_hw_interface
     void RS485Interface::pollKillMission()
     {
         // Transmit request to get kill status
+        mutex_.lock();
         _rs485Connection.Transmit(_GET_KILL_STATUS_MSG, 8);
+        mutex_.unlock();
         // Wait for a short duration to allow for processing
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(300));
         // Transmit request to get mission status
+        mutex_.lock();
         _rs485Connection.Transmit(_GET_MISSION_STATUS_MSG, 8);
+        mutex_.unlock();
         
     }
     void RS485Interface::pollPower()
     {
+        mutex_.lock();
         _rs485Connection.Transmit(_GET_POWER_MSG, 15);
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        //_rs485Connection.Transmit(_GET_CURRENT_MSG, 15);
+        mutex_.unlock();
         //std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        //_rs485Connection.Transmit(_GET_TEMP_MSG, 15);
-        //std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        mutex_.lock();
         _rs485Connection.Transmit(_GET_FEEDBACK_MSG, 15);
+        mutex_.unlock();
 
     }
 
@@ -124,8 +128,9 @@ namespace sonia_hw_interface
 
         // Construct the command packet
         const uint8_t dropper[8] = {_START_BYTE, _SlaveId::SLAVE_IO, _Cmd::CMD_IO_DROPPER_ACTION, 1, request->side, std::get<0>(checksum), std::get<1>(checksum), _END_BYTE};
-
+        mutex_.lock();
         transmit_status = _rs485Connection.Transmit(dropper, 8);
+        mutex_.unlock();
         response->result = transmit_status;
     }
 
@@ -288,8 +293,10 @@ namespace sonia_hw_interface
         while (_thread_control)
         {
             // This sleep is needed... I DON'T KNOW WHY...
-            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+            //std::this_thread::sleep_for(std::chrono::milliseconds(300));
+            mutex_.lock();
             ssize_t str_len = _rs485Connection.ReadPackets(_DATA_READ_CHUNCK, data);
+            mutex_.unlock();
 
             if (str_len != -1)
             {
@@ -306,10 +313,11 @@ namespace sonia_hw_interface
         // close the thread.
         while (_thread_control)
         {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
             // pause the thread.
             while (!_writerQueue.empty())
             {
-                std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                //std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
                 queueObject msg = _writerQueue.get_n_pop_front();
                 const size_t data_size = msg.data.size() + 7;
@@ -331,7 +339,9 @@ namespace sonia_hw_interface
                 data[data_size - 3] = std::get<0>(checksum);
                 data[data_size - 2] = std::get<1>(checksum);
                 data[data_size - 1] = _END_BYTE;
+                mutex_.lock();
                 _rs485Connection.Transmit(data, data_size);
+                mutex_.unlock();
                 delete data;
             }
         }

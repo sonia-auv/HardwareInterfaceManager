@@ -208,6 +208,8 @@ namespace sonia_hw_interface
         rclcpp::CallbackGroup::SharedPtr group1;
         SharedQueue<queueObject> _writerQueue;
         SharedQueue<uint8_t> _parseQueue;
+        std::mutex mutex_;
+        
 
         bool _thread_control;
 
