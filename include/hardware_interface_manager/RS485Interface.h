@@ -10,9 +10,13 @@
 #include "sonia_common_ros2/msg/serial_message.hpp"
 #include "sonia_common_ros2/msg/kill_status.hpp"
 #include "sonia_common_ros2/msg/mission_status.hpp"
-#include "sonia_common_ros2/msg/motor_voltages.hpp"
-#include "sonia_common_ros2/msg/battery_voltage.hpp"
+#include "sonia_common_ros2/msg/motor_feedback.hpp"
+#include "sonia_common_ros2/msg/motor_power_messages.hpp"
+#include "sonia_common_ros2/msg/battery_power_messages.hpp"
 #include "sonia_common_ros2/srv/dropper_service.hpp"
+#include "sonia_common_ros2/msg/motor_pwm.hpp"
+#include <std_srvs/srv/empty.hpp>
+#include <std_msgs/msg/bool.hpp>
 #include "SharedQueue.h"
 
 namespace sonia_hw_interface
@@ -123,6 +127,7 @@ namespace sonia_hw_interface
          * via the RS485 connection.
          */
         void pollKillMission();
+        void pollPower();
 
         /**
          * @brief Processes a dropper service request.
@@ -132,7 +137,7 @@ namespace sonia_hw_interface
          */
         void processDropperRequest(const std::shared_ptr<sonia_common_ros2::srv::DropperService::Request> request, std::shared_ptr<sonia_common_ros2::srv::DropperService::Response> response);
 
-        void processPowerManagement(uint8_t cmd, std::vector<uint8_t> data);
+        void processPowerManagement(const uint8_t cmd, const std::vector<uint8_t> data);
 
         /**
          * @brief
@@ -148,11 +153,17 @@ namespace sonia_hw_interface
          */
         void publishMission(bool status);
 
-        void publishMotorVoltages(std::vector<float> data);
+        void publishMotor(uint8_t cmd, std::vector<float> data);
 
-        void publishBatteryVoltages(float *data);
+        void publishBattery(uint8_t cmd, float *data);
 
-        int convertBytesToFloat(const std::vector<uint8_t> &req, std::vector<float> &res);
+        void publishMotorFeedback(std::vector<uint8_t> data);
+
+        void EnableDisableMotors(const std_msgs::msg::Bool &msg);
+        void ToggleMotors(const bool state, uint8_t size, std::vector<uint8_t> &data);
+        void PwmCallback(const sonia_common_ros2::msg::MotorPwm &msg);
+
+        int convertBytesToFloat(const std::vector<uint8_t> &req, std::vector<float> &res, const size_t size);
 
         union _bytesToFloat
         {
@@ -160,31 +171,52 @@ namespace sonia_hw_interface
             float_t value;
         };
 
+        const uint8_t nb_thruster = 8;
+        const uint8_t nb_battery = 2;
         static const int _DATA_READ_CHUNCK = 1024;
         const u_int8_t _START_BYTE = 0x3A;
         const u_int8_t _END_BYTE = 0x0D;
         const uint8_t _GET_KILL_STATUS_MSG[8] = {0x3A, 4, 1, 1, 0, 0, 77, 0x0D};
         const uint8_t _GET_MISSION_STATUS_MSG[8] = {0x3A, 4, 0, 1, 1, 0, 77, 0x0D};
+        const uint8_t _GET_POWER_MSG[15] = {0x3A, 8, 0, 8, 1, 1, 1, 1, 1, 1, 1, 1, 0, 95, 0x0D};
+        const uint8_t _GET_FEEDBACK_MSG[15] = {0x3A, 8, 15, 8, 1, 1, 1, 1, 1, 1, 1, 1, 0, 110, 0x0D};
         const uint8_t _EXPECTED_PWR_VOLT_SIZE = 10;
 
         sonia_common_cpp::SerialConn _rs485Connection;
 
+
         rclcpp::Publisher<sonia_common_ros2::msg::KillStatus>::SharedPtr _publisherKill;
         rclcpp::Publisher<sonia_common_ros2::msg::MissionStatus>::SharedPtr _publisherMission;
-        rclcpp::Publisher<sonia_common_ros2::msg::MotorVoltages>::SharedPtr _publisherMotorVoltages;
-        rclcpp::Publisher<sonia_common_ros2::msg::BatteryVoltage>::SharedPtr _publisherBatteryVoltages;
+        rclcpp::Publisher<sonia_common_ros2::msg::MotorPowerMessages>::SharedPtr _publisherMotorVoltages;
+        rclcpp::Publisher<sonia_common_ros2::msg::BatteryPowerMessages>::SharedPtr _publisherBatteryVoltages;
+        rclcpp::Publisher<sonia_common_ros2::msg::MotorPowerMessages>::SharedPtr _publisherMotorCurrents;
+        rclcpp::Publisher<sonia_common_ros2::msg::BatteryPowerMessages>::SharedPtr _publisherBatteryCurrents;
+        rclcpp::Publisher<sonia_common_ros2::msg::MotorPowerMessages>::SharedPtr _publisherMotorTemperature;
+        rclcpp::Publisher<sonia_common_ros2::msg::BatteryPowerMessages>::SharedPtr _publisherBatteryTemperature;
+        rclcpp::Publisher<sonia_common_ros2::msg::MotorFeedback>::SharedPtr _publisherMotorFeedback;
+        rclcpp::Publisher<sonia_common_ros2::msg::MotorPwm>::SharedPtr _publisherThrusterPwm;
+        rclcpp::Subscription<sonia_common_ros2::msg::MotorPwm>::SharedPtr _subscriberThrusterPwm;
+        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr _subscriberMotorOnOff;
         rclcpp::Service<sonia_common_ros2::srv::DropperService>::SharedPtr _dropperServer;
         rclcpp::TimerBase::SharedPtr _timerKillMission;
+        rclcpp::TimerBase::SharedPtr _timerPowerRequest;
 
         std::thread _reader;
         std::thread _parser;
         std::thread _writer;
 
+        rclcpp::CallbackGroup::SharedPtr group1;
         SharedQueue<queueObject> _writerQueue;
         SharedQueue<uint8_t> _parseQueue;
+        std::mutex mutex_;
+        
 
         bool _thread_control;
 
+        uint8_t ESC_SLAVE;
+
+        const char *auv;
+        
     };
 
 }
